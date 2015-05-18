@@ -5,7 +5,7 @@
 #pragma once
 
 class Skvlr {
-
+  friend class Worker;
     Skvlr(const std::string &name, int num_cores);
     ~Skvlr();
 

@@ -9,11 +9,11 @@ AR = ar -rc
 RANLIB = ranlib
 CC = g++
 
-CCFLAGS = -ggdb -Wall -Wextra -Werror -Wswitch-default -Wwrite-strings \
+CCFLAGS = -ggdb -Wall -Wextra -Werror -Wwrite-strings \
         -O2 -Iinclude -Itest/include -std=c++11 \
         -I$(LIBS_INCLUDE_DIR)
 
-SKVLR_SOURCES = skvlr.cc
+SKVLR_SOURCES = skvlr.cc worker.cc murmurhash3.cc
 SKVLR_OBJS = $(SKVLR_SOURCES:%.cc=$(OBJ_DIR)/%.o)
 
 LIBRARY_SKVLR = $(LIBS_DIR)/skvlr.a

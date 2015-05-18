@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "skvlr.h"
+#include "murmurhash3.h"
 
 Skvlr::Skvlr(const std::string &name, int num_cores)
     : name(name), num_cores(num_cores)
@@ -21,6 +22,9 @@ Skvlr::~Skvlr()
 int Skvlr::db_get(const int key)
 {
   std::cout << "db_get: " << key << std::endl;
+  uint32_t out;
+  
+  MurmurHash3_x86_32(&key, sizeof(int), 0, &out);
     return -1;
 }
 
