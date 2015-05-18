@@ -1,9 +1,13 @@
 #include <map>
+#include <mutex>
+#include <string>
+
+#pragma once
 
 class Skvlr {
 
-    Svklr(const std::string &name, int num_cores);
-    ~Svklr();
+    Skvlr(const std::string &name, int num_cores);
+    ~Skvlr();
 
     // Blocking
     int db_get(const int key);
@@ -19,7 +23,7 @@ class Skvlr {
         int key;
         int value;
         RequestType type;
-        semaphore sema;
+      std::mutex mtx;
     };
 
     const std::string name;
