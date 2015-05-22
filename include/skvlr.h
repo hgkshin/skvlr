@@ -1,6 +1,7 @@
 #include <map>
 #include <mutex>
 #include <string>
+#include "semaphore.h"
 
 #pragma once
 
