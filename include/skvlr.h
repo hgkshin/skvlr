@@ -1,6 +1,7 @@
 #include <map>
 #include <mutex>
 #include <string>
+#include <queue>
 
 #pragma once
 
@@ -29,5 +30,6 @@ class Skvlr {
     const std::string name;
     const int num_cores;
 
-    // Matrix of request queues.
+    std::queue<struct request> **request_matrix;
+    std::mutex **request_matrix_locks;
 };
