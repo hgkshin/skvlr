@@ -13,6 +13,7 @@ class Worker {
 
     void handle_get(Skvlr::request &req);
     void handle_put(Skvlr::request &req);
+    void listen();
 
     const int fd;
     const int worker_id;

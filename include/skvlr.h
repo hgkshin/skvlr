@@ -15,17 +15,18 @@ class Skvlr {
     // Non-blocking
     void db_put(const int key, const int value);
 
- private:
-
     enum RequestType { GET, PUT };
+    enum RequestStatus { PENDING, SUCCESS, ERROR };
 
     struct request {
         int key;
         int value;
         RequestType type;
-      std::mutex mtx;
+        RequestStatus status;
+        Semaphore sema;
     };
 
+private:
     const std::string name;
     const int num_cores;
 
