@@ -4,17 +4,24 @@ INCLUDE_DIR = include
 BIN_DIR = bin
 LIBS_DIR = libs
 TEST_DIR = test/src
+print-%  : ; @echo $* = $($*)
+
 
 AR = ar -rc
 RANLIB = ranlib
 CC = g++
 
 CCFLAGS = -ggdb -Wall -Wextra -Werror -Wwrite-strings \
-        -O2 -Iinclude -Itest/include -std=c++11 \
+        -O2 -Iinclude -Itest/include -std=c++11 -pthread \
         -I$(LIBS_INCLUDE_DIR)
+LDFLAGS = -pthread
 
 SKVLR_SOURCES = skvlr.cc worker.cc murmurhash3.cc
 SKVLR_OBJS = $(SKVLR_SOURCES:%.cc=$(OBJ_DIR)/%.o)
+
+TEST_SRCS = skvlr_test.cc
+TEST_OBJS = $(TEST_SRCS:%.cc=$(OBJ_DIR)/%.o)
+TEST_BIN = $(BIN_DIR)/test
 
 LIBRARY_SKVLR = $(LIBS_DIR)/skvlr.a
 
@@ -37,3 +44,11 @@ $(OBJ_DIR)/%.o: %.cc
 	@echo + $@ [cc $<]
 	$(CC) $(CCFLAGS) -c $< -o $@ -c
 
+$(TEST_BIN): $(TEST_OBJS) $(LIBRARY_SKVLR) | $(BIN_DIR)
+	@echo + $@ [ld $^]
+	@$(CC) -o $@ $^ $(LDFLAGS)
+
+test: $(TEST_BIN)
+
+clean:
+	rm $(LIBS_DIR)/* $(OBJ_DIR)/*

@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <map>
 
 #include "skvlr.h"
@@ -5,7 +6,7 @@
 #pragma once
 
 class Worker {
-
+ public:
     Worker(const int fd, const int worker_id, std::map<int, int> data);
     ~Worker();
 
