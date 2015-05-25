@@ -25,7 +25,6 @@ Skvlr::Skvlr(const std::string &name, int num_cores)
                 Worker w(0, id, data);
                 }, i);
     }
-    sleep (10);
     for (auto &thread : threads) {
         thread.join();
     }
@@ -37,15 +36,18 @@ Skvlr::~Skvlr()
 }
 int Skvlr::db_get(const int key)
 {
-  std::cout << "db_get: " << key << std::endl;
+  //std::cout << "db_get: " << key << std::endl;
   uint32_t out;
 
   MurmurHash3_x86_32(&key, sizeof(int), 0, &out);
-    return -1;
+  return -1;
 }
 
 void Skvlr::db_put(const int key, const int value)
 {
-  std::cout << "db_put: " << key << ": " << value << std::endl;
-    /* Empty */
+  UNUSED(key);
+  UNUSED(value);
+  //std::cout << "db_put: " << key << ": " << value << std::endl;
+  
+  /* Empty */
 }
