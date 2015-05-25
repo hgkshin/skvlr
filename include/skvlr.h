@@ -10,7 +10,7 @@
 class Skvlr {
     friend class Worker;
 
-public:
+ public:
     Skvlr(const std::string &name, int num_cores);
     ~Skvlr();
 
