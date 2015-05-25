@@ -37,4 +37,11 @@ private:
 
     std::queue<struct request> **request_matrix;
     std::mutex **request_matrix_locks;
+
+    struct worker_info {
+        std::string dir_name;
+        int core_id;
+    };
+
+    static void *spawn_worker(void *aux);
 };

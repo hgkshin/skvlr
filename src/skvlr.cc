@@ -26,9 +26,13 @@ Skvlr::Skvlr(const std::string &name, int num_cores)
     }
 
     for(int i = 0; i < num_cores; i++) {
-      spawn_and_pin_thread(name, i);
+      worker_info *info = (worker_info *) malloc(sizeof(worker_info));
+      info->core_id = i;
+      info->dir_name = name;
+      pthread_t worker_thread;
+      pthread_create(&worker_thread, NULL, &spawn_worker, info);
+      
     }
-    // Spawn threads, pin to cores
 
     closedir(dir);
 }
@@ -56,4 +60,8 @@ void Skvlr::db_put(const int key, const int value)
 {
   std::cout << "db_put: " << key << ": " << value << std::endl;
     /* Empty */
+}
+
+void *Skvlr::spawn_worker(void *aux) {
+    return NULL;
 }
