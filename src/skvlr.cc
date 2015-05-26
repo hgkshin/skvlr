@@ -13,9 +13,10 @@
 #include "murmurhash3.h"
 #include "worker.h"
 
-Skvlr::Skvlr(const std::string &name, int num_cores)
-    : name(name), num_cores(num_cores)
+Skvlr::Skvlr(const std::string &name, int num_workers)
+  : name(name), num_workers(num_workers), num_cores(sysconf(_SC_NPROCESSORS_ONLN))
 {
+    assert(num_workers <= num_cores);
     /* Alternatively, can find number of cores using:
      int num_cores = sysconf(_SC_NPROCESSORS_ONLN);
     */
@@ -33,11 +34,11 @@ Skvlr::Skvlr(const std::string &name, int num_cores)
       request_matrix[i] = new synch_queue[num_cores];
     }
 
-    for(int i = 0; i < num_cores; i++) {
+    for(int i = 0; i < num_workers; i++) {
       worker_info *info = new worker_info;
       info->core_id = i;
       info->dir_name = name;
-      info->num_cores = num_cores;
+      info->num_queues = num_cores;
       info->queues = request_matrix[i];
       pthread_t worker_thread;
       pthread_create(&worker_thread, NULL, &spawn_worker, info);
@@ -47,7 +48,7 @@ Skvlr::Skvlr(const std::string &name, int num_cores)
 
 Skvlr::~Skvlr()
 {
-    for(int i = 0; i < num_cores; i++) {
+    for(int i = 0; i < num_workers; i++) {
       delete[] request_matrix[i];
     }
     delete[] request_matrix;
@@ -81,7 +82,7 @@ int Skvlr::db_get(const int key, int *value)
     if(curr_cpu < 0)
       return -1;
 
-    //synch_queue synch_queue = request_matrix[out % num_cores][curr_cpu];
+    //synch_queue synch_queue = request_matrix[out % num_workers][curr_cpu];
     /* Construct request, enqueue request, down the semaphore. Return
        -1 or value based on response. */
     

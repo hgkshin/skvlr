@@ -39,6 +39,7 @@ private:
     };
 
     const std::string name;
+    const int num_workers;
     const int num_cores;
 
     struct synch_queue {
