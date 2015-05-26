@@ -14,14 +14,15 @@
 #include "worker.h"
 
 Skvlr::Skvlr(const std::string &name, int num_workers)
-  : name(name), num_workers(num_workers), num_cores(sysconf(_SC_NPROCESSORS_ONLN))
+  : name(name), num_workers(num_workers), num_cores(sysconf(_SC_NPROCESSORS_ONLN)),
+    workers(num_workers), active(true)
 {
     assert(num_workers <= num_cores);
-    /* Alternatively, can find number of cores using:
-     int num_cores = sysconf(_SC_NPROCESSORS_ONLN);
-    */
+    std::cout << "Commencing initialization of " << name << "." << std::endl;
+
     DIR *dir = opendir(name.c_str());
     if(!dir) {
+      std::cout << "Directory " << name << " doesn't exist, so we create it." << std::endl;
       if(!mkdir(name.c_str(), 0 /* what mode do we want? */)) {
 	/* throw some sort of error and maybe exit? At least throw an exception.*/
 	exit(1);
@@ -29,21 +30,20 @@ Skvlr::Skvlr(const std::string &name, int num_workers)
     }
     closedir(dir);
 
+    std::cout << "Initializing queue matrix." << std::endl;
     request_matrix = new synch_queue*[num_cores];
     for(int i = 0; i < num_cores; i++) {
       request_matrix[i] = new synch_queue[num_cores];
     }
 
+    std::cout << "Spawning workers." << std::endl;
     for(int i = 0; i < num_workers; i++) {
-      worker_info *info = new worker_info;
-      info->core_id = i;
-      info->dir_name = name;
-      info->num_queues = num_cores;
-      info->queues = request_matrix[i];
-      pthread_t worker_thread;
-      pthread_create(&worker_thread, NULL, &spawn_worker, info);
-      workers.push_back(worker_thread);
+      worker_info info = {name, i, request_matrix[i], num_cores, &active};
+      std::cout << "About to spawn worker " << i << std::endl;
+      workers[i] = std::thread(&spawn_worker, info);
+      std::cout << "Spawned worker " << i << std::endl;
     }
+
 }
 
 Skvlr::~Skvlr()
@@ -53,12 +53,11 @@ Skvlr::~Skvlr()
     }
     delete[] request_matrix;
 
-    //TODO: use a shared bool to tell workers when to shut down.
-    /*
-    for (pthread_t& worker : workers) {
-      pthread_join(worker, NULL);
+    active = false;
+
+    for(auto& worker : workers) {
+      worker.join();
     }
-    */
 }
 
 /**
@@ -106,20 +105,22 @@ void Skvlr::db_put(const int key, const int value)
     // TODO: safely insert new request into proper queue, return immediately
 }
 
-void *Skvlr::spawn_worker(void *aux) {
-    worker_info *info = (struct worker_info *) aux;
-
+void Skvlr::spawn_worker(worker_info info) {
+    std::cout << "About to set up worker " << info.core_id << std::endl;
     /* Set up processor affinity. */
     cpu_set_t cpuset;
+    std::cout << "right before zeroing out cpuset." << std::endl;
     CPU_ZERO(&cpuset);
-    CPU_SET(info->core_id, &cpuset);
+    std::cout << "right before setting core id." << std::endl;
+    CPU_SET(info.core_id, &cpuset);
+    std::cout << "right before assert." << std::endl;
     assert(!pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset));
+    std::cout << "Successfully assigned processor affinity for worker " <<
+      info.core_id << std::endl;
 
     /* Initialize worker. */
-    Worker worker(*info);
-    delete info;
+    Worker worker(info);
 
     /* Now worker loops infinitely. TODO: need a way for worker to exit. */
     worker.listen();
-    return NULL;
 }

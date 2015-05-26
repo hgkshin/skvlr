@@ -2,6 +2,7 @@
 #include <mutex>
 #include <string>
 #include <queue>
+#include <thread>
 
 #include "semaphore.h"
 
@@ -51,15 +52,17 @@ private:
     /* Access using [worker cpu][client cpu]. */
     synch_queue **request_matrix;
 
-    /* TODO: update db_open to deal with this. */
     struct worker_info {
         std::string dir_name;
         int core_id;
         synch_queue *queues;
         int num_queues;
+        bool *active;
     };
 
-    std::vector<pthread_t> workers;
+    std::vector<std::thread> workers;
 
-    static void *spawn_worker(void *aux);
+    static void spawn_worker(worker_info info);
+
+    bool active;
 };

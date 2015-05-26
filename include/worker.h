@@ -23,4 +23,5 @@ private:
     const int fd;
     const int worker_id;
     std::map<int, int> data;
+    bool *active;
 };
