@@ -75,6 +75,11 @@ int Skvlr::db_get(const int key)
     uint32_t out;
 
     MurmurHash3_x86_32(&key, sizeof(int), 0, &out);
+    
+    unsigned cpu;
+    if(!getcpu(&cpu, NULL, NULL)) {
+      return -1;
+    }
     return -1;
 }
 
