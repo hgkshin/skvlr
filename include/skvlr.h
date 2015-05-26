@@ -2,11 +2,14 @@
 #include <mutex>
 #include <string>
 
+#include "semaphore.h"
+
 #pragma once
 
 class Skvlr {
     friend class Worker;
- public:
+
+public:
     Skvlr(const std::string &name, int num_cores);
     ~Skvlr();
 
@@ -16,15 +19,16 @@ class Skvlr {
     // Non-blocking
     void db_put(const int key, const int value);
 
- private:
-
+private:
     enum RequestType { GET, PUT };
+    enum RequestStatus { PENDING, SUCCESS, ERROR };
 
     struct request {
         int key;
         int value;
         RequestType type;
-      std::mutex mtx;
+        RequestStatus status;
+        Semaphore sema;
     };
 
     const std::string name;
