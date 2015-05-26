@@ -57,12 +57,9 @@ private:
         int core_id;
         synch_queue *queues;
         int num_queues;
-        bool *active;
     };
 
     std::vector<std::thread> workers;
 
     static void spawn_worker(worker_info info);
-
-    bool active;
 };

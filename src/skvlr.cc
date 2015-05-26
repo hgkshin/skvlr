@@ -15,7 +15,7 @@
 
 Skvlr::Skvlr(const std::string &name, int num_workers)
   : name(name), num_workers(num_workers), num_cores(sysconf(_SC_NPROCESSORS_ONLN)),
-    workers(num_workers), active(true)
+    workers(num_workers)
 {
     assert(num_workers <= num_cores);
     std::cout << "Commencing initialization of " << name << "." << std::endl;
@@ -23,10 +23,7 @@ Skvlr::Skvlr(const std::string &name, int num_workers)
     DIR *dir = opendir(name.c_str());
     if(!dir) {
       std::cout << "Directory " << name << " doesn't exist, so we create it." << std::endl;
-      if(!mkdir(name.c_str(), 0 /* what mode do we want? */)) {
-	/* throw some sort of error and maybe exit? At least throw an exception.*/
-	exit(1);
-      }
+      assert(mkdir(name.c_str(), 0 /* what mode do we want? */));
     }
     closedir(dir);
 
@@ -38,26 +35,21 @@ Skvlr::Skvlr(const std::string &name, int num_workers)
 
     std::cout << "Spawning workers." << std::endl;
     for(int i = 0; i < num_workers; i++) {
-      worker_info info = {name, i, request_matrix[i], num_cores, &active};
-      std::cout << "About to spawn worker " << i << std::endl;
+      worker_info info = {name, i, request_matrix[i], num_cores};
       workers[i] = std::thread(&spawn_worker, info);
-      std::cout << "Spawned worker " << i << std::endl;
     }
-
 }
 
 Skvlr::~Skvlr()
 {
+    for(auto& worker : workers) {
+        worker.join();
+    }
+
     for(int i = 0; i < num_workers; i++) {
-      delete[] request_matrix[i];
+        delete[] request_matrix[i];
     }
     delete[] request_matrix;
-
-    active = false;
-
-    for(auto& worker : workers) {
-      worker.join();
-    }
 }
 
 /**
@@ -79,7 +71,7 @@ int Skvlr::db_get(const int key, int *value)
  
     int curr_cpu = sched_getcpu();
     if(curr_cpu < 0)
-      return -1;
+        return -1;
 
     //synch_queue synch_queue = request_matrix[out % num_workers][curr_cpu];
     /* Construct request, enqueue request, down the semaphore. Return
@@ -106,17 +98,11 @@ void Skvlr::db_put(const int key, const int value)
 }
 
 void Skvlr::spawn_worker(worker_info info) {
-    std::cout << "About to set up worker " << info.core_id << std::endl;
     /* Set up processor affinity. */
     cpu_set_t cpuset;
-    std::cout << "right before zeroing out cpuset." << std::endl;
     CPU_ZERO(&cpuset);
-    std::cout << "right before setting core id." << std::endl;
     CPU_SET(info.core_id, &cpuset);
-    std::cout << "right before assert." << std::endl;
     assert(!pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset));
-    std::cout << "Successfully assigned processor affinity for worker " <<
-      info.core_id << std::endl;
 
     /* Initialize worker. */
     Worker worker(info);
