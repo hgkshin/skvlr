@@ -101,6 +101,8 @@ void Worker::handle_put(Skvlr::request &req)
  */
 int Worker::persist(const int key, const int value)
 {
+    (void) key;
+    (void) value;
     // TODO: implement me!
     return -1;
 

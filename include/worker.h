@@ -6,16 +6,17 @@
 #pragma once
 
 #define UNUSED(x) (void)x;
-
 class Worker {
 public:
     Worker(const int fd, const int worker_id, std::map<int, int> data);
+    Worker(const Skvlr::worker_info info);
     ~Worker();
+
+    void listen();
 
 private:
     void handle_get(Skvlr::request &req);
     void handle_put(Skvlr::request &req);
-    void listen();
     int persist(const int key, const int value);
 
     const int fd;

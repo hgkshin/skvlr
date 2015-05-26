@@ -1,6 +1,7 @@
 #include <map>
 #include <mutex>
 #include <string>
+#include <queue>
 
 #include "semaphore.h"
 
@@ -34,5 +35,16 @@ private:
     const std::string name;
     const int num_cores;
 
-    // Matrix of request queues.
+    /* I guess I could do this C++ style with vectors? */
+    std::queue<struct request> **request_matrix;
+    std::mutex **request_matrix_locks;
+
+    struct worker_info {
+        std::string dir_name;
+        int core_id;
+    };
+
+    std::vector<pthread_t> workers;
+
+    static void *spawn_worker(void *aux);
 };
