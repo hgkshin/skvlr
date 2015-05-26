@@ -10,7 +10,7 @@ int main(int argc, const char *argv[]) {
 
 // put() random values, asserts that values are with consistent get() on a single core
 static bool test_valid_values() {
-  Skvlr test_kv = Skvlr("test_db", 1);
+  Skvlr test_kv("test_db", 1);
   for (int i = 0; i < 1000; i++) {
     test_kv.db_put(i, i);
   }

@@ -69,7 +69,7 @@ int Skvlr::db_get(const int key, int *value)
     uint32_t out;
 
     MurmurHash3_x86_32(&key, sizeof(int), 0, &out);
- 
+
     int curr_cpu = sched_getcpu();
     if(curr_cpu < 0)
         return -1;
@@ -77,7 +77,7 @@ int Skvlr::db_get(const int key, int *value)
     //synch_queue synch_queue = request_matrix[out % num_workers][curr_cpu];
     /* Construct request, enqueue request, down the semaphore. Return
        -1 or value based on response. */
-    
+
     //TODO: safely insert new request into proper queue
     //TODO: wait until request semaphore wakes you up
     //TODO: if request fails (req.STATUS == Skvlr::ERROR) return -1; else 0
