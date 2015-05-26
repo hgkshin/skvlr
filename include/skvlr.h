@@ -17,6 +17,10 @@ public:
     Skvlr(const std::string &name, int num_cores);
     ~Skvlr();
 
+    // Prevent assignment and copy constructors.
+    Skvlr & operator=(const Skvlr&) = delete;
+    Skvlr(const Skvlr&) = delete;
+
     // Blocking
     int db_get(const int key, int *value);
 

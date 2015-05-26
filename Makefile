@@ -29,13 +29,15 @@ PROFILER_BIN = $(BIN_DIR)/profiler
 
 LIBRARY_SKVLR = $(LIBS_DIR)/skvlr.a
 
+EXECUTABLES = $(TEST_BIN) $(PROFILER_BIN)
+
 vpath % $(SRC_DIR) $(TEST_DIR) $(PROFILER_DIR)
+
+all: $(EXECUTABLES)
 
 $(LIBRARY_SKVLR): $(SKVLR_OBJS) | $(LIBS_DIR)
 	$(AR) $(LIBRARY_SKVLR) $(SKVLR_OBJS)
 	$(RANLIB) $(LIBRARY_SKVLR)
-
-all: $(LIBRARY_SKVLR)
 
 $(BIN_DIR):
 	@mkdir -p $@
@@ -48,7 +50,7 @@ $(OBJ_DIR)/%.o: %.cc
 	@echo + $@ [cc $<]
 	$(CC) $(CCFLAGS) -c $< -o $@ -c
 
-$(TEST_BIN): $(TEST_OBJS) $(SKVLR_OBJS) $(LIBRARY_SKVLR) | $(BIN_DIR)
+$(TEST_BIN): $(TEST_OBJS) $(LIBRARY_SKVLR) | $(BIN_DIR)
 	@echo + $@ [ld $^]
 	@$(CC) -o $@ $^ $(LDFLAGS)
 
@@ -57,11 +59,14 @@ test: $(TEST_BIN)
 	@-$(TEST_BIN)
 	@-pkill test
 
-$(PROFILER_BIN): $(PROFILER_OBJS) $(SKVLR_OBJS) $(LIBRARY_SKVLR) | $(BIN_DIR)
+$(PROFILER_BIN): $(PROFILER_OBJS) $(LIBRARY_SKVLR) | $(BIN_DIR)
 	@echo + $@ [ld $^]
 	@$(CC) -o $@ $^ $(LDFLAGS)
 
 profiler: $(PROFILER_BIN)
+	@-$(PROFILER_BIN)
+
+.PHONY: all clean
 
 clean:
-	rm $(LIBS_DIR)/* $(OBJ_DIR)/*
+	rm $(LIBS_DIR)/* $(OBJ_DIR)/* $(BIN_DIR)/*
