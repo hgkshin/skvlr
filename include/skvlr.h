@@ -25,7 +25,7 @@ public:
     int db_get(const int key, int *value);
 
     // Non-blocking
-    void db_put(const int key, const int value);
+    void db_put(const int key, int value);
 
 private:
     enum RequestType { GET, PUT };

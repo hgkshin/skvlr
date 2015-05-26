@@ -63,8 +63,6 @@ Skvlr::~Skvlr()
  */
 int Skvlr::db_get(const int key, int *value)
 {
-    UNUSED(value); // TODO: remove
-
     std::cout << "db_get: " << key << std::endl;
     uint32_t out;
 
@@ -86,7 +84,14 @@ int Skvlr::db_get(const int key, int *value)
     synch_queue.queue_lock.unlock();
 
     req.sema.wait();
-    return req.status == SUCCESS ? 0 : -1;
+    std::cout << "db_get " << key << " returned ";
+    if(req.status == SUCCESS) {
+        std::cout << *value << std::endl;
+	return 0;
+    } else {
+        std::cout << "error" << std::endl;
+	return -1;
+    }
 }
 
 /**
@@ -94,11 +99,30 @@ int Skvlr::db_get(const int key, int *value)
  * @param key Key to insert data into.
  * @param value Value to insert
  */
-void Skvlr::db_put(const int key, const int value)
+void Skvlr::db_put(const int key, int value)
 {
     std::cout << "db_put: " << key << ": " << value << std::endl;
 
-    // TODO: safely insert new request into proper queue, return immediately
+    uint32_t out;
+    MurmurHash3_x86_32(&key, sizeof(int), 0, &out);
+
+    int curr_cpu = sched_getcpu();
+    if(curr_cpu < 0)
+        return;
+    
+    request *req = new request;
+    req->key = key;
+    req->value = &value;
+    req->type = PUT;
+    req->status = PENDING;
+    
+    /* Note: worker is responsible for freeing req's memory. */
+    synch_queue &synch_queue = request_matrix[out % num_workers][curr_cpu];
+    synch_queue.queue_lock.lock();
+    synch_queue.queue.push(req);
+    synch_queue.queue_lock.unlock();
+
+    /* TODO: how do we tell the user if there are errors? */
 }
 
 void Skvlr::spawn_worker(worker_init_data init_data) {
