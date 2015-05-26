@@ -70,7 +70,7 @@ void Worker::handle_get(Skvlr::request &req)
         goto release_sema;
     }
 
-    req.value = value->second;
+    *req.value = value->second;
     req.status = Skvlr::SUCCESS;
 
 release_sema:
@@ -92,13 +92,13 @@ void Worker::handle_put(Skvlr::request &req)
     assert(req.status == Skvlr::PENDING);
 
     // TODO: implement persisting the data, add to map if persistence succeeds
-    int success = persist(req.key, req.value);
+    int success = persist(req.key, *req.value);
     if (success != 0) {
       req.status = Skvlr::ERROR;
       return;
     }
 
-    data.insert(std::pair<int, int>(req.key, req.value));
+    data.insert(std::pair<int, int>(req.key, *req.value));
     req.status = Skvlr::SUCCESS;
 }
 
@@ -113,5 +113,4 @@ int Worker::persist(const int key, const int value)
     (void) value;
     // TODO: implement me!
     return -1;
-
 }
