@@ -1,14 +1,13 @@
+#include <assert.h>
 #include <iostream>
-<<<<<<< HEAD
 #include <fstream>
 #include <pthread.h>
 #include <sys/dir.h>
 #include <sys/stat.h>
-=======
+#include <sched.h>
 #include <map>
 #include <thread>
 #include <vector>
->>>>>>> 23d0843c5cc32ad6088c5bbab7e9ef13aea075c4
 
 #include "skvlr.h"
 #include "murmurhash3.h"
@@ -17,7 +16,9 @@
 Skvlr::Skvlr(const std::string &name, int num_cores)
     : name(name), num_cores(num_cores)
 {
-<<<<<<< HEAD
+    /* Alternatively, can find number of cores using:
+     int num_cores = sysconf(_SC_NPROCESSORS_ONLN);
+    */
     DIR *dir = opendir(name.c_str());
     if(!dir) {
       if(!mkdir(name.c_str(), 0 /* what mode do we want? */)) {
@@ -25,12 +26,7 @@ Skvlr::Skvlr(const std::string &name, int num_cores)
 	exit(1);
       }
     }
-=======
-    std::cout << "Hello" << std::endl;
-    // Create KV store if no directory exists.
-    //
-    // Open files
->>>>>>> 23d0843c5cc32ad6088c5bbab7e9ef13aea075c4
+    closedir(dir);
 
     request_matrix = new std::queue<struct request>*[num_cores];
     request_matrix_locks = new std::mutex*[num_cores];
@@ -39,18 +35,16 @@ Skvlr::Skvlr(const std::string &name, int num_cores)
       request_matrix_locks[i] = new std::mutex[num_cores];
     }
 
-<<<<<<< HEAD
     for(int i = 0; i < num_cores; i++) {
       worker_info *info = (worker_info *) malloc(sizeof(worker_info));
       info->core_id = i;
       info->dir_name = name;
       pthread_t worker_thread;
       pthread_create(&worker_thread, NULL, &spawn_worker, info);
-      
+      workers.push_back(worker_thread);
     }
 
-    closedir(dir);
-=======
+    /*
     std::vector<std::thread> threads(num_cores);
     for (int i = 0; i < num_cores; ++i) {
         threads[i] =
@@ -63,7 +57,7 @@ Skvlr::Skvlr(const std::string &name, int num_cores)
     for (auto &thread : threads) {
         thread.join();
     }
->>>>>>> 23d0843c5cc32ad6088c5bbab7e9ef13aea075c4
+    */
 }
 
 Skvlr::~Skvlr()
@@ -74,23 +68,41 @@ Skvlr::~Skvlr()
     }
     delete[] request_matrix;
     delete[] request_matrix_locks;
+
+    for (pthread_t& worker : workers) {
+      pthread_join(worker, NULL);
+    }
 }
 
 int Skvlr::db_get(const int key)
 {
-  std::cout << "db_get: " << key << std::endl;
-  uint32_t out;
+    std::cout << "db_get: " << key << std::endl;
+    uint32_t out;
 
-  MurmurHash3_x86_32(&key, sizeof(int), 0, &out);
+    MurmurHash3_x86_32(&key, sizeof(int), 0, &out);
     return -1;
 }
 
 void Skvlr::db_put(const int key, const int value)
 {
-  std::cout << "db_put: " << key << ": " << value << std::endl;
+    std::cout << "db_put: " << key << ": " << value << std::endl;
     /* Empty */
 }
 
 void *Skvlr::spawn_worker(void *aux) {
+    struct worker_info *info = (struct worker_info *) aux;
+    
+    /* Set up processor affinity. */
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(info->core_id, &cpuset);
+    assert(!pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset));
+
+    /* Initialize worker. */
+    Worker worker(*info);
+    free(info);
+
+    /* Now worker loops infinitely. TODO: need a way for worker to exit. */
+    worker.listen();
     return NULL;
 }

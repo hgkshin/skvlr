@@ -35,6 +35,7 @@ private:
     const std::string name;
     const int num_cores;
 
+    /* I guess I could do this C++ style with vectors? */
     std::queue<struct request> **request_matrix;
     std::mutex **request_matrix_locks;
 
@@ -42,6 +43,8 @@ private:
         std::string dir_name;
         int core_id;
     };
+
+    std::vector<pthread_t> workers;
 
     static void *spawn_worker(void *aux);
 };

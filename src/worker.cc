@@ -1,13 +1,8 @@
-<<<<<<< HEAD
 #include<assert.h>
-
-#include "worker.h"
-
-=======
 #include <iostream>
+
 #include "worker.h"
 
->>>>>>> 23d0843c5cc32ad6088c5bbab7e9ef13aea075c4
 Worker::Worker(const int fd, const int worker_id, std::map<int, int> data)
   : fd(fd), worker_id(worker_id), data(data)
 {
@@ -104,6 +99,8 @@ void Worker::handle_put(Skvlr::request &req)
  */
 int Worker::persist(const int key, const int value)
 {
+    (void) key;
+    (void) value;
     // TODO: implement me!
     return -1;
 
