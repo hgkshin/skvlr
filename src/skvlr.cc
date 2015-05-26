@@ -69,19 +69,41 @@ Skvlr::~Skvlr()
     }
 }
 
-int Skvlr::db_get(const int key)
+/**
+ * Get data from the key-value store synchronously. All data is stored in
+ * memory.
+ * TODO: details about performance characteristics of this?
+ * @param key Key to search for
+ * @param value Pointer to where value should be stored.
+ * @return 0 on success, negative number on failure.
+ */
+int Skvlr::db_get(const int key, int *value)
 {
+    UNUSED(value); // TODO: remove
+
     std::cout << "db_get: " << key << std::endl;
     uint32_t out;
 
     MurmurHash3_x86_32(&key, sizeof(int), 0, &out);
+
+    //TODO: safely insert new request into proper queue
+    //TODO: wait until request semaphore wakes you up
+    //TODO: if request fails (req.STATUS == Skvlr::ERROR) return -1; else 0
+
     return -1;
 }
 
+/**
+ * Put data into the key-value store asynchronously.
+ * @param key Key to insert data into.
+ * @param value Value to insert
+ */
 void Skvlr::db_put(const int key, const int value)
 {
     std::cout << "db_put: " << key << ": " << value << std::endl;
     /* Empty */
+
+    // TODO: safely insert new request into proper queue, return immediately
 }
 
 void *Skvlr::spawn_worker(void *aux) {

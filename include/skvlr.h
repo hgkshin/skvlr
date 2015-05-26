@@ -17,7 +17,7 @@ public:
     ~Skvlr();
 
     // Blocking
-    int db_get(const int key);
+    int db_get(const int key, int *value);
 
     // Non-blocking
     void db_put(const int key, const int value);

@@ -15,7 +15,9 @@ static bool test_valid_values() {
     test_kv.db_put(i, i);
   }
   for (int i = 0; i < 1000; i++) {
-    check_eq(test_kv.db_get(i), i);
+    int value;
+    test_kv.db_get(i, &value);
+    check_eq(value, i);
   }
   return true;
 }
