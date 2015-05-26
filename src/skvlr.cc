@@ -34,27 +34,15 @@ Skvlr::Skvlr(const std::string &name, int num_cores)
     }
 
     for(int i = 0; i < num_cores; i++) {
-      worker_info *info = (worker_info *) malloc(sizeof(worker_info));
+      worker_info *info = new worker_info;
       info->core_id = i;
       info->dir_name = name;
+      info->num_cores = num_cores;
+      info->queues = request_matrix[i];
       pthread_t worker_thread;
       pthread_create(&worker_thread, NULL, &spawn_worker, info);
       workers.push_back(worker_thread);
     }
-
-    /*
-    std::vector<std::thread> threads(num_cores);
-    for (int i = 0; i < num_cores; ++i) {
-        threads[i] =
-            std::thread([](int id) {
-                std::map<int, int> data;
-                Worker w(0, id, data);
-                }, i);
-    }
-    for (auto &thread : threads) {
-        thread.join();
-    }
-    */
 }
 
 Skvlr::~Skvlr()
@@ -64,9 +52,12 @@ Skvlr::~Skvlr()
     }
     delete[] request_matrix;
 
+    //TODO: use a shared bool to tell workers when to shut down.
+    /*
     for (pthread_t& worker : workers) {
       pthread_join(worker, NULL);
     }
+    */
 }
 
 int Skvlr::db_get(const int key)
@@ -75,11 +66,15 @@ int Skvlr::db_get(const int key)
     uint32_t out;
 
     MurmurHash3_x86_32(&key, sizeof(int), 0, &out);
-    
-    unsigned cpu;
-    if(!getcpu(&cpu, NULL, NULL)) {
+ 
+    int curr_cpu = sched_getcpu();
+    if(curr_cpu < 0)
       return -1;
-    }
+
+    //synch_queue synch_queue = request_matrix[out % num_cores][curr_cpu];
+    /* Construct request, enqueue request, down the semaphore. Return
+       -1 or value based on response. */
+    
     return -1;
 }
 
@@ -90,7 +85,7 @@ void Skvlr::db_put(const int key, const int value)
 }
 
 void *Skvlr::spawn_worker(void *aux) {
-    struct worker_info *info = (struct worker_info *) aux;
+    worker_info *info = (struct worker_info *) aux;
 
     /* Set up processor affinity. */
     cpu_set_t cpuset;
@@ -100,7 +95,7 @@ void *Skvlr::spawn_worker(void *aux) {
 
     /* Initialize worker. */
     Worker worker(*info);
-    free(info);
+    delete info;
 
     /* Now worker loops infinitely. TODO: need a way for worker to exit. */
     worker.listen();

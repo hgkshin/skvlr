@@ -43,11 +43,15 @@ private:
       char padding[2*CACHE_LINE_SIZE - sizeof(std::queue<request>) - sizeof(std::mutex)];
     };
 
+    /* Access using [worker cpu][client cpu]. */
     synch_queue **request_matrix;
 
+    /* TODO: update db_open to deal with this. */
     struct worker_info {
         std::string dir_name;
         int core_id;
+        synch_queue *queues;
+        int num_queues;
     };
 
     std::vector<pthread_t> workers;
