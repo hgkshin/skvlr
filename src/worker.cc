@@ -10,6 +10,8 @@ Worker::Worker(const int fd, const int worker_id, std::map<int, int> data)
         std::cout << "I am worker " << worker_id << std::endl;
         sleep(1);
     }
+    UNUSED(this->fd);
+    UNUSED(this->worker_id);
 }
 
 Worker::~Worker()

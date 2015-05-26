@@ -4,8 +4,8 @@ INCLUDE_DIR = include
 BIN_DIR = bin
 LIBS_DIR = libs
 TEST_DIR = test/src
+PROFILER_DIR = profiler/src
 print-%  : ; @echo $* = $($*)
-
 
 AR = ar -rc
 RANLIB = ranlib
@@ -19,13 +19,17 @@ LDFLAGS = -pthread
 SKVLR_SOURCES = skvlr.cc worker.cc murmurhash3.cc
 SKVLR_OBJS = $(SKVLR_SOURCES:%.cc=$(OBJ_DIR)/%.o)
 
-TEST_SRCS = skvlr_test.cc
+TEST_SRCS = skvlr_test.cc test_utils.cc
 TEST_OBJS = $(TEST_SRCS:%.cc=$(OBJ_DIR)/%.o)
 TEST_BIN = $(BIN_DIR)/test
 
+PROFILER_SRCS = skvlr_profiler.cc
+PROFILER_OBJS = $(PROFILER_SRCS:%.cc=$(OBJ_DIR)/%.o)
+PROFILER_BIN = $(BIN_DIR)/profiler
+
 LIBRARY_SKVLR = $(LIBS_DIR)/skvlr.a
 
-vpath % $(SRC_DIR) $(TEST_DIR)
+vpath % $(SRC_DIR) $(TEST_DIR) $(PROFILER_DIR)
 
 $(LIBRARY_SKVLR): $(SKVLR_OBJS) | $(LIBS_DIR)
 	$(AR) $(LIBRARY_SKVLR) $(SKVLR_OBJS)
@@ -49,6 +53,15 @@ $(TEST_BIN): $(TEST_OBJS) $(LIBRARY_SKVLR) | $(BIN_DIR)
 	@$(CC) -o $@ $^ $(LDFLAGS)
 
 test: $(TEST_BIN)
+	@-pkill test
+	@-$(TEST_BIN)
+	@-pkill test
+
+$(PROFILER_BIN): $(PROFILER_OBJS) $(LIBRARY_SKVLR) | $(BIN_DIR)
+	@echo + $@ [ld $^]
+	@$(CC) -o $@ $^ $(LDFLAGS)
+
+profiler: $(PROFILER_BIN)
 
 clean:
 	rm $(LIBS_DIR)/* $(OBJ_DIR)/*
