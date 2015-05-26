@@ -48,7 +48,7 @@ $(OBJ_DIR)/%.o: %.cc
 	@echo + $@ [cc $<]
 	$(CC) $(CCFLAGS) -c $< -o $@ -c
 
-$(TEST_BIN): $(TEST_OBJS) $(LIBRARY_SKVLR) | $(BIN_DIR)
+$(TEST_BIN): $(TEST_OBJS) $(SKVLR_OBJS) $(LIBRARY_SKVLR) | $(BIN_DIR)
 	@echo + $@ [ld $^]
 	@$(CC) -o $@ $^ $(LDFLAGS)
 
@@ -57,7 +57,7 @@ test: $(TEST_BIN)
 	@-$(TEST_BIN)
 	@-pkill test
 
-$(PROFILER_BIN): $(PROFILER_OBJS) $(LIBRARY_SKVLR) | $(BIN_DIR)
+$(PROFILER_BIN): $(PROFILER_OBJS) $(SKVLR_OBJS) $(LIBRARY_SKVLR) | $(BIN_DIR)
 	@echo + $@ [ld $^]
 	@$(CC) -o $@ $^ $(LDFLAGS)
 
