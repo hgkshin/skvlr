@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <fstream>
 #include <map>
 
 #include "skvlr.h"
@@ -9,18 +10,18 @@
 
 class Worker {
 public:
-    Worker(const int fd, const int worker_id, std::map<int, int> data);
     Worker(const Skvlr::worker_init_data init_data);
     ~Worker();
 
     void listen();
 
-private:
     void handle_get(Skvlr::request *req);
     void handle_put(Skvlr::request *req);
-    int persist(const int key, const int value);
 
-    const int fd;
-    const int worker_id;
+    int persist(const int key, const int value);
+    // TODO (RR): Make these methods private but testable.
+ private:
     std::map<int, int> data;
+    const Skvlr::worker_init_data worker_data;
+    std::ofstream outputLog;
 };

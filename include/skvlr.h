@@ -3,6 +3,7 @@
 #include <string>
 #include <queue>
 #include <thread>
+#include <sstream>
 
 #include "semaphore.h"
 
@@ -27,7 +28,6 @@ public:
     // Non-blocking
     void db_put(const int key, int value);
 
-private:
     enum RequestType { GET, PUT };
     enum RequestStatus { PENDING, SUCCESS, ERROR };
 
@@ -43,25 +43,47 @@ private:
         Semaphore sema;
     };
 
+    struct synch_queue {
+        std::queue<request> queue;
+        std::mutex queue_lock;
+        char padding[2*CACHE_LINE_SIZE - sizeof(std::queue<request>) - sizeof(std::mutex)];
+    };
+
+    struct worker_init_data {
+        const std::string dir_name;
+        const int core_id;
+        const synch_queue *queues;
+        const int num_queues;
+
+        worker_init_data(const std::string dir_name, const int core_id,
+                         const synch_queue *queues, const int num_queues)
+        :  dir_name(dir_name), core_id(core_id), queues(queues), num_queues(num_queues)
+        {
+            /* Empty */
+        }
+
+        // Returns the name of the data file that this worker stores its data in.
+        std::string dataFileName() const {
+            std::stringstream ss;
+            ss << this->core_id << ".data";
+            return ss.str();
+        }
+
+        // Returns the path at which this worker stores its data.
+        std::string dataFilePath() const {
+            std::stringstream ss;
+            ss << this->dir_name << "/" << dataFileName();
+            return ss.str();
+        }
+    };
+
+ private:
     const std::string name;
     const int num_workers;
     const int num_cores;
 
-    struct synch_queue {
-      std::queue<request*> queue;
-      std::mutex queue_lock;
-      char padding[2*CACHE_LINE_SIZE - sizeof(std::queue<request>) - sizeof(std::mutex)];
-    };
-
     /* Access using [worker cpu][client cpu]. */
     synch_queue **request_matrix;
-
-    struct worker_init_data {
-        std::string dir_name;
-        int core_id;
-        synch_queue *queues;
-        int num_queues;
-    };
 
     std::vector<std::thread> workers;
 
