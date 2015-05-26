@@ -74,15 +74,19 @@ int Skvlr::db_get(const int key, int *value)
     if(curr_cpu < 0)
         return -1;
 
-    //synch_queue synch_queue = request_matrix[out % num_workers][curr_cpu];
-    /* Construct request, enqueue request, down the semaphore. Return
-       -1 or value based on response. */
+    request req;
+    req.key = key;
+    req.value = value;
+    req.type = GET;
+    req.status = PENDING;
 
-    //TODO: safely insert new request into proper queue
-    //TODO: wait until request semaphore wakes you up
-    //TODO: if request fails (req.STATUS == Skvlr::ERROR) return -1; else 0
+    synch_queue &synch_queue = request_matrix[out % num_workers][curr_cpu];
+    synch_queue.queue_lock.lock();
+    synch_queue.queue.push(&req);
+    synch_queue.queue_lock.unlock();
 
-    return -1;
+    req.sema.wait();
+    return req.status == SUCCESS ? 0 : -1;
 }
 
 /**
@@ -93,7 +97,6 @@ int Skvlr::db_get(const int key, int *value)
 void Skvlr::db_put(const int key, const int value)
 {
     std::cout << "db_put: " << key << ": " << value << std::endl;
-    /* Empty */
 
     // TODO: safely insert new request into proper queue, return immediately
 }

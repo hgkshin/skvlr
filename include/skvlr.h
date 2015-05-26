@@ -48,7 +48,7 @@ private:
     const int num_cores;
 
     struct synch_queue {
-      std::queue<request> queue;
+      std::queue<request*> queue;
       std::mutex queue_lock;
       char padding[2*CACHE_LINE_SIZE - sizeof(std::queue<request>) - sizeof(std::mutex)];
     };
