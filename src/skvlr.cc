@@ -22,21 +22,22 @@ Skvlr::Skvlr(const std::string &name, int num_workers)
 
     DIR *dir = opendir(name.c_str());
     if(!dir) {
-      std::cout << "Directory " << name << " doesn't exist, so we create it." << std::endl;
-      assert(mkdir(name.c_str(), 0 /* what mode do we want? */));
+        std::cout << "Directory " << name << " doesn't exist, so we create it."
+		  << std::endl;
+        assert(mkdir(name.c_str(), 777));
     }
     closedir(dir);
 
     std::cout << "Initializing queue matrix." << std::endl;
     request_matrix = new synch_queue*[num_cores];
     for(int i = 0; i < num_cores; i++) {
-      request_matrix[i] = new synch_queue[num_cores];
+        request_matrix[i] = new synch_queue[num_cores];
     }
 
     std::cout << "Spawning workers." << std::endl;
     for(int i = 0; i < num_workers; i++) {
-      worker_info info = {name, i, request_matrix[i], num_cores};
-      workers[i] = std::thread(&spawn_worker, info);
+        worker_init_data init_data = {name, i, request_matrix[i], num_cores};
+        workers[i] = std::thread(&spawn_worker, init_data);
     }
 }
 
@@ -97,15 +98,15 @@ void Skvlr::db_put(const int key, const int value)
     // TODO: safely insert new request into proper queue, return immediately
 }
 
-void Skvlr::spawn_worker(worker_info info) {
+void Skvlr::spawn_worker(worker_init_data init_data) {
     /* Set up processor affinity. */
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
-    CPU_SET(info.core_id, &cpuset);
+    CPU_SET(init_data.core_id, &cpuset);
     assert(!pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset));
 
     /* Initialize worker. */
-    Worker worker(info);
+    Worker worker(init_data);
 
     /* Now worker loops infinitely. TODO: need a way for worker to exit. */
     worker.listen();

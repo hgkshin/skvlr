@@ -52,7 +52,7 @@ private:
     /* Access using [worker cpu][client cpu]. */
     synch_queue **request_matrix;
 
-    struct worker_info {
+    struct worker_init_data {
         std::string dir_name;
         int core_id;
         synch_queue *queues;
@@ -61,5 +61,5 @@ private:
 
     std::vector<std::thread> workers;
 
-    static void spawn_worker(worker_info info);
+    static void spawn_worker(worker_init_data init_data);
 };

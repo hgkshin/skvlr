@@ -10,7 +10,7 @@
 class Worker {
 public:
     Worker(const int fd, const int worker_id, std::map<int, int> data);
-    Worker(const Skvlr::worker_info info);
+    Worker(const Skvlr::worker_init_data init_data);
     ~Worker();
 
     void listen();
@@ -23,5 +23,4 @@ private:
     const int fd;
     const int worker_id;
     std::map<int, int> data;
-    bool *active;
 };

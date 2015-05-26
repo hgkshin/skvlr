@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include <assert.h>
 
@@ -16,10 +17,10 @@ Worker::Worker(const int fd, const int worker_id, std::map<int, int> data)
 }
 
 // TODO: Change fd, worker_id values
-Worker::Worker(const Skvlr::worker_info info)
+Worker::Worker(const Skvlr::worker_init_data init_data)
   : fd(5), worker_id(5)
 {
-  UNUSED(info);
+  UNUSED(init_data);
 }
 
 Worker::~Worker()
