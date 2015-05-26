@@ -7,6 +7,8 @@
 
 #pragma once
 
+#define CACHE_LINE_SIZE 64
+
 class Skvlr {
     friend class Worker;
 
@@ -35,9 +37,13 @@ private:
     const std::string name;
     const int num_cores;
 
-    /* I guess I could do this C++ style with vectors? */
-    std::queue<struct request> **request_matrix;
-    std::mutex **request_matrix_locks;
+    struct synch_queue {
+      std::queue<request> queue;
+      std::mutex queue_lock;
+      char padding[2*CACHE_LINE_SIZE - sizeof(std::queue<request>) - sizeof(std::mutex)];
+    };
+
+    synch_queue **request_matrix;
 
     struct worker_info {
         std::string dir_name;

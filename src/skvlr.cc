@@ -28,11 +28,9 @@ Skvlr::Skvlr(const std::string &name, int num_cores)
     }
     closedir(dir);
 
-    request_matrix = new std::queue<struct request>*[num_cores];
-    request_matrix_locks = new std::mutex*[num_cores];
+    request_matrix = new synch_queue*[num_cores];
     for(int i = 0; i < num_cores; i++) {
-      request_matrix[i] = new std::queue<struct request>[num_cores];
-      request_matrix_locks[i] = new std::mutex[num_cores];
+      request_matrix[i] = new synch_queue[num_cores];
     }
 
     for(int i = 0; i < num_cores; i++) {
@@ -63,10 +61,8 @@ Skvlr::~Skvlr()
 {
     for(int i = 0; i < num_cores; i++) {
       delete[] request_matrix[i];
-      delete[] request_matrix_locks[i];
     }
     delete[] request_matrix;
-    delete[] request_matrix_locks;
 
     for (pthread_t& worker : workers) {
       pthread_join(worker, NULL);
