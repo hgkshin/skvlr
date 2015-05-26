@@ -17,7 +17,7 @@ public:
     ~Skvlr();
 
     // Blocking
-    int db_get(const int key);
+    int db_get(const int key, int *value);
 
     // Non-blocking
     void db_put(const int key, const int value);
@@ -26,9 +26,13 @@ private:
     enum RequestType { GET, PUT };
     enum RequestStatus { PENDING, SUCCESS, ERROR };
 
+    /**
+     * For PUT requests, value points to the value to store.
+     * For GET requests, value points to where to store the retrieved value.
+     */
     struct request {
         int key;
-        int value;
+        int *value;
         RequestType type;
         RequestStatus status;
         Semaphore sema;
