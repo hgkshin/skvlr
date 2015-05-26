@@ -93,9 +93,8 @@ pid_t waitpid_with_timeout(pid_t pid, int *status, int sec, bool *timedout, bool
   };
 
   // the signal handler structure
-  const struct sigaction timeout_action = {
-    .sa_handler = timeout
-  };
+  struct sigaction timeout_action;
+  timeout_action.sa_handler = timeout;
 
   // sets the signal handlers
   sigaction(SIGALRM, &timeout_action, NULL);
@@ -162,7 +161,8 @@ bool _run_test(const char *name, bool (*fn)(void), int *ntests, int *npassed,
 
   if (!(child_pid = fork())) {
     // remove the parent's timeout handler
-    const struct sigaction default_action = { .sa_handler = SIG_DFL };
+    struct sigaction default_action;
+    default_action.sa_handler = SIG_DFL;
     sigaction(SIGALRM, &default_action, NULL);
 
     bool result = fn();

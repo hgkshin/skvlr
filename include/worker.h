@@ -6,6 +6,7 @@
 #pragma once
 
 #define UNUSED(x) (void)x;
+
 class Worker {
 public:
     Worker(const int fd, const int worker_id, std::map<int, int> data);
