@@ -13,13 +13,14 @@
 #include <assert.h>
 
 #include "skvlr.h"
+#include "murmurhash3.h"
 #include "worker.h"
 
 const std::string PROFILER_DUMP_DIR = "profiler/profiler_dump/";
 const std::string PROFILER_BASIC = PROFILER_DUMP_DIR + "profiler_basic_db";
 
-const int TOTAL_CORES = sysconf(_SC_NPROCESSORS_ONLN);
-const int NUM_OPS = 60000;
+const int TOTAL_CORES = 8; //sysconf(_SC_NPROCESSORS_ONLN);
+const int NUM_OPS = 50000;
 
 // Varies proportion of gets to puts
 const double GET_FRAC = 0.9;
@@ -38,12 +39,29 @@ void generate_keys(int num_keys, double mean, double stddev, std::vector<int> &k
     }
 }
 
+void generate_partitioned_keys(int num_keys, uint32_t ops_id, std::vector<int> &keys) {
+  int key = 0;
+  uint32_t out;
+  MurmurHash3_x86_32(&key, sizeof(int), 0, &out);
+  while(out % TOTAL_CORES != ops_id) {
+    key++;
+    MurmurHash3_x86_32(&key, sizeof(int), 0, &out);
+  }
+  
+  for (int i = 0; i < num_keys; i++) {
+    keys.push_back(key);
+  }
+}
+
 // Generate operations per client thread
-void generate_ops(std::vector<std::pair<int, int>> &ops) {
+void generate_ops(std::vector<std::pair<int, int>> &ops, uint32_t ops_id) {
+    UNUSED(ops_id);
     std::vector<int> get_keys;
     std::vector<int> put_keys;
-    generate_keys(NUM_GETS, 0, 10, get_keys);
-    generate_keys(NUM_PUTS, 0, 10, put_keys);
+    generate_partitioned_keys(NUM_GETS, ops_id, get_keys);
+    generate_partitioned_keys(NUM_PUTS, ops_id, put_keys);
+    //generate_keys(NUM_GETS, 0, 10, get_keys);
+    //generate_keys(NUM_PUTS, 0, 10, put_keys);
     // TODO (kevinshin): Make get/put distinguishing cleaner
     // TODO (kevinshin): Initialize all gets with values first (call put)
     for(size_t i = 0; i < get_keys.size(); i++) {
@@ -97,9 +115,9 @@ int main() {
  
     std::vector<std::vector<std::pair<int, int>>> client_thread_ops;
 
-    for (int i = 0; i < TOTAL_CORES; i++) {
+    for (uint32_t i = 0; i < TOTAL_CORES; i++) {
         std::vector<std::pair<int, int>> ops;
-        generate_ops(ops);
+        generate_ops(ops, i);
         client_thread_ops.push_back(ops);
     }
     // Runs for: 1, 2, 4 ... TOTAL_CORES
@@ -119,10 +137,13 @@ int main() {
         double end_time = get_wall_time();
         double duration = end_time - start_time;
         
-        DEBUG_PROFILER("Core speeds for " << kv_cores << " worker cores: " << std::endl);
+        /*DEBUG_PROFILER("Core speeds for " << kv_cores << " worker cores: " << std::endl);
         DEBUG_PROFILER("Duration: " << duration << std::endl);
         DEBUG_PROFILER("Number of client threads: " << TOTAL_CORES << std::endl);
         DEBUG_PROFILER("Number of operations per client thread: " << NUM_OPS << std::endl);
+        DEBUG_PROFILER("Total operations / second: " << NUM_OPS / duration << std::endl);
+        */
+        DEBUG_PROFILER(NUM_OPS/duration << std::endl);
     }
     return 0;
 }
