@@ -57,7 +57,7 @@ void Worker::listen()
                 total_puts++;
                 break;
             default: assert(false); // sanity check
-        }
+        } 
     }
 }
 

@@ -36,6 +36,5 @@ public:
     
     /* Access using [worker cpu][client cpu]. */
     synch_queue **request_matrix;
-
     static void spawn_worker(worker_init_data init_data);
 };

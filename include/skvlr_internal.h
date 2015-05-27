@@ -8,7 +8,7 @@
 #pragma once
 
 /* Debug macros per file type */
-#define DEBUG_WORKER_FLAG true
+// #define DEBUG_WORKER_FLAG true
 #define DEBUG_SKVLR_FLAG true
 #define DEBUG_TEST_FLAG true
 #define DEBUG_PROFILER_FLAG true

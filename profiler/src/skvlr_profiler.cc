@@ -1,5 +1,6 @@
 #include <thread>
 #include <algorithm>
+#include <sys/time.h>
 #include <ctime>
 #include <iostream>
 #include <set>
@@ -18,7 +19,7 @@ const std::string PROFILER_DUMP_DIR = "profiler/profiler_dump/";
 const std::string PROFILER_BASIC = PROFILER_DUMP_DIR + "profiler_basic_db";
 
 const int TOTAL_CORES = sysconf(_SC_NPROCESSORS_ONLN);
-const int NUM_OPS = 20000;
+const int NUM_OPS = 60000;
 
 // Varies proportion of gets to puts
 const double GET_FRAC = 0.9;
@@ -77,6 +78,15 @@ void run_ops(Skvlr *kv, int core_id, const std::vector<std::pair<int, int>> ops)
     }
 }
 
+double get_wall_time(){
+    struct timeval time;
+    if (gettimeofday(&time,NULL)){
+        //  Handle error
+        return 0;
+    }
+    return (double)time.tv_sec + (double)time.tv_usec * .000001;
+}
+
 int main() {
     std::string remove_command = "rm -rf ";
     remove_command += PROFILER_DUMP_DIR;
@@ -93,12 +103,11 @@ int main() {
         client_thread_ops.push_back(ops);
     }
     // Runs for: 1, 2, 4 ... TOTAL_CORES
-    for (int kv_cores = 1; kv_cores <= TOTAL_CORES; kv_cores *= 2) {
-        std::cout << "Core speeds for " << kv_cores << " processors: " << std::endl;
+    for (int kv_cores = 1; kv_cores <= TOTAL_CORES; kv_cores++) {
         Skvlr kv(PROFILER_BASIC, kv_cores);
         std::vector<std::thread> threads(TOTAL_CORES);
 
-        std::clock_t start = std::clock();
+        double start_time = get_wall_time();
         for (int client_thread = 0; client_thread < TOTAL_CORES; client_thread++) {
             threads[client_thread] = std::thread(run_ops, &kv,
                                                  client_thread, client_thread_ops[client_thread]);
@@ -107,10 +116,13 @@ int main() {
         for (auto &thread : threads) {
             thread.join();
         }
-
-        double duration = (std::clock() - start) / (double) CLOCKS_PER_SEC;
-        std::cout << "Duration: " << duration << std::endl;
-        std::cout << "Number of operations: " << NUM_OPS << std::endl;
+        double end_time = get_wall_time();
+        double duration = end_time - start_time;
+        
+        DEBUG_PROFILER("Core speeds for " << kv_cores << " worker cores: " << std::endl);
+        DEBUG_PROFILER("Duration: " << duration << std::endl);
+        DEBUG_PROFILER("Number of client threads: " << TOTAL_CORES << std::endl);
+        DEBUG_PROFILER("Number of operations per client thread: " << NUM_OPS << std::endl);
     }
     return 0;
 }
