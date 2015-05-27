@@ -1,24 +1,10 @@
-
 #include <iostream>
 #include <assert.h>
 
 #include "worker.h"
 
-
-Worker::Worker(const int fd, const int worker_id, std::map<int, int> data)
-  : fd(fd), worker_id(worker_id), data(data)
-{
-    for (int i = 0; i < 5; ++i) {
-        std::cout << "I am worker " << worker_id << std::endl;
-        sleep(1);
-    }
-    UNUSED(this->fd);
-    UNUSED(this->worker_id);
-}
-
 // TODO: Change fd, worker_id values
 Worker::Worker(const Skvlr::worker_init_data init_data)
-  : fd(5), worker_id(5)
 {
   UNUSED(init_data);
 }

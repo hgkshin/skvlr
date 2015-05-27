@@ -34,6 +34,8 @@ Vagrant.configure(2) do |config|
     sudo apt-get install -y pkg-config
     sudo apt-get install -y automake
     sudo apt-get install -y g++-4.9
+    sudo apt-get install -y git
+    sudo apt-get install -y valgrind
     sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 40
 
   SHELL

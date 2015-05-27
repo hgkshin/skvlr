@@ -1,8 +1,12 @@
+# Test files
+test/test_dump/*
+
 # Vagrant cache
 .vagrant*
 
 # DS_Store
 .DS_Store
+.vimrc
 
 # Compiled Object files
 *.slo

@@ -23,8 +23,8 @@ Skvlr::Skvlr(const std::string &name, int num_workers)
     DIR *dir = opendir(name.c_str());
     if(!dir) {
         std::cout << "Directory " << name << " doesn't exist, so we create it."
-		  << std::endl;
-        assert(mkdir(name.c_str(), 777));
+		        << std::endl;
+        assert(mkdir(name.c_str(), 777) == 0);
     }
     closedir(dir);
 
@@ -33,7 +33,6 @@ Skvlr::Skvlr(const std::string &name, int num_workers)
     for(int i = 0; i < num_cores; i++) {
         request_matrix[i] = new synch_queue[num_cores];
     }
-
     std::cout << "Spawning workers." << std::endl;
     for(int i = 0; i < num_workers; i++) {
         worker_init_data init_data = {name, i, request_matrix[i], num_cores};
@@ -50,7 +49,7 @@ Skvlr::~Skvlr()
     for(int i = 0; i < num_workers; i++) {
         delete[] request_matrix[i];
     }
-    delete[] request_matrix;
+    delete[] request_matrix; 
 }
 
 /**

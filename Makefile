@@ -4,6 +4,7 @@ INCLUDE_DIR = include
 BIN_DIR = bin
 LIBS_DIR = libs
 TEST_DIR = test/src
+TEST_DUMP_DIR = test/test_dump
 PROFILER_DIR = profiler/src
 print-%  : ; @echo $* = $($*)
 
@@ -56,6 +57,8 @@ $(TEST_BIN): $(TEST_OBJS) $(LIBRARY_SKVLR) | $(BIN_DIR)
 
 test: $(TEST_BIN)
 	@-pkill test
+	@rm -rf $(TEST_DUMP_DIR)
+	@mkdir $(TEST_DUMP_DIR)
 	@-$(TEST_BIN)
 	@-pkill test
 
