@@ -3,15 +3,26 @@
 
 #include "worker.h"
 
-// TODO: Change fd, worker_id values
-Worker::Worker(const Skvlr::worker_init_data init_data)
+Worker::Worker(const worker_init_data init_data)
+    : worker_data(init_data), outputLog(init_data.dataFilePath(), std::ios::app),
+      total_gets(0), total_puts(0)
 {
-  UNUSED(init_data);
+    // Read the contents of the data file if any and store it in `data`.
+    std::ifstream f(init_data.dataFilePath());
+    int key, value;
+    while (f >> key >> value) {
+        data[key] = value;
+    }
+    f.close();
 }
 
 Worker::~Worker()
 {
-    /* Empty */
+    DEBUG_WORKER("Total gets for core #" << worker_data.core_id << ": "
+                 << total_gets << std::endl);
+    DEBUG_WORKER("Total puts for core #" << worker_data.core_id << ": "
+                 << total_puts << std::endl);
+    outputLog.close();
 }
 
 /**
@@ -20,19 +31,32 @@ Worker::~Worker()
  */
 void Worker::listen()
 {
-    while(true) {
-        /* TODO: If data exists handle it */
-        if (false) {
-            Skvlr::request *req; // TODO: pull from queue
-            switch(req->type) {
-                case Skvlr::GET:
-                    handle_get(req);
-                    break;
-                case Skvlr::PUT:
-                    handle_put(req);
-                    break;
-                default: assert(false); // sanity check
-            }
+    // check queues round-robin
+    unsigned int curQueue = 0;
+    while(!*this->worker_data.should_exit) {
+        synch_queue *queue = worker_data.queues + (curQueue);
+        curQueue = (curQueue + 1) % worker_data.num_queues;
+        queue->queue_lock.lock();
+
+        if (queue->queue.empty()) {
+            queue->queue_lock.unlock();
+            continue;
+        }
+
+        request *req = queue->queue.front();
+        queue->queue.pop();
+        queue->queue_lock.unlock();
+
+        switch(req->type) {
+            case GET:
+                handle_get(req);
+                total_gets++;
+                break;
+            case PUT:
+                handle_put(req);
+                total_puts++;
+                break;
+            default: assert(false); // sanity check
         }
     }
 }
@@ -45,20 +69,21 @@ void Worker::listen()
  *
  * @param req PENDING GET request to handle
  */
-void Worker::handle_get(Skvlr::request *req)
+void Worker::handle_get(request *req)
 {
     // TODO: handle gets to other cores.
-    assert(req->type == Skvlr::GET);
-    assert(req->status == Skvlr::PENDING);
+    assert(req->type == GET);
+    assert(req->status == PENDING);
 
     auto value = data.find(req->key);
     if (value == data.end()) {
-        req->status = Skvlr::ERROR;
+        //DEBUG_WORKER("Get not found!" << std::endl);
+        req->status = ERROR;
         goto release_sema;
     }
 
-    *req->value = value->second;
-    req->status = Skvlr::SUCCESS;
+    *req->return_value = value->second;
+    req->status = SUCCESS;
 
 release_sema:
     req->sema.notify();
@@ -71,24 +96,33 @@ release_sema:
  * successfully or not.
  *
  * @param req PENDING PUT request to handle
+ *
+ * NOTE: we need to add a callback parameter to req if we wish to make the
+ * status of a request visible, as per the documentation above.  Right now, it's
+ * merely discarded immediately by deleting the request object.
  */
-void Worker::handle_put(Skvlr::request *req)
+void Worker::handle_put(request *req)
 {
     /* Empty */
-    assert(req->type == Skvlr::PUT);
-    assert(req->status == Skvlr::PENDING);
+    assert(req->type == PUT);
+    assert(req->status == PENDING);
 
-    // TODO: implement persisting the data, add to map if persistence succeeds
-    int success = persist(req->key, *req->value);
+    int success = persist(req->key, req->value_to_store);
     if (success != 0) {
-      req->status = Skvlr::ERROR;
-      return;
+      DEBUG_WORKER("handle_put failed\n");
+      req->status = ERROR;
+      goto release_sema;
     }
 
-    data.insert(std::pair<int, int>(req->key, *req->value));
-    req->status = Skvlr::SUCCESS;
+    data.insert(std::pair<int, int>(req->key, req->value_to_store));
+    req->status = SUCCESS;
 
-    // TODO: need to free memory of req because it is dynamically allocated.
+release_sema:
+    if (req->synchronous) {
+        req->sema.notify();
+    } else {
+        delete req;
+    }
 }
 
 /**
@@ -98,8 +132,6 @@ void Worker::handle_put(Skvlr::request *req)
  */
 int Worker::persist(const int key, const int value)
 {
-    (void) key;
-    (void) value;
-    // TODO: implement me!
-    return -1;
+    outputLog << key << '\t' << value << '\n' << std::flush;
+    return 0;
 }

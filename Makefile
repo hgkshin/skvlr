@@ -4,7 +4,6 @@ INCLUDE_DIR = include
 BIN_DIR = bin
 LIBS_DIR = libs
 TEST_DIR = test/src
-TEST_DUMP_DIR = test/test_dump
 PROFILER_DIR = profiler/src
 print-%  : ; @echo $* = $($*)
 
@@ -20,7 +19,7 @@ LDFLAGS = -pthread
 SKVLR_SOURCES = skvlr.cc worker.cc murmurhash3.cc
 SKVLR_OBJS = $(SKVLR_SOURCES:%.cc=$(OBJ_DIR)/%.o)
 
-TEST_SRCS = skvlr_test.cc test_utils.cc
+TEST_SRCS = skvlr_test.cc basic_tests.cc single_thread_tests.cc test_utils.cc
 TEST_OBJS = $(TEST_SRCS:%.cc=$(OBJ_DIR)/%.o)
 TEST_BIN = $(BIN_DIR)/test
 
@@ -57,8 +56,6 @@ $(TEST_BIN): $(TEST_OBJS) $(LIBRARY_SKVLR) | $(BIN_DIR)
 
 test: $(TEST_BIN)
 	@-pkill test
-	@rm -rf $(TEST_DUMP_DIR)
-	@mkdir $(TEST_DUMP_DIR)
 	@-$(TEST_BIN)
 	@-pkill test
 

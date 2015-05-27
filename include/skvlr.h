@@ -3,12 +3,12 @@
 #include <string>
 #include <queue>
 #include <thread>
-
+#include <sstream>
 #include "semaphore.h"
 
-#pragma once
+#include "skvlr_internal.h"
 
-#define CACHE_LINE_SIZE 64
+#pragma once
 
 class Skvlr {
     friend class Worker;
@@ -21,49 +21,21 @@ public:
     Skvlr & operator=(const Skvlr&) = delete;
     Skvlr(const Skvlr&) = delete;
 
-    // Blocking
-    int db_get(const int key, int *value);
+    // Synchronous if status != NULL, Asynchronous if status == NULL
+    void db_get(const int key, int *value, RequestStatus *status=NULL);
+    void db_put(const int key, int value, RequestStatus *status=NULL);
 
-    // Non-blocking
-    void db_put(const int key, int value);
+    // Public only for testing purposes
+    std::vector<std::thread> workers;
 
-private:
-    enum RequestType { GET, PUT };
-    enum RequestStatus { PENDING, SUCCESS, ERROR };
-
-    /**
-     * For PUT requests, value points to the value to store.
-     * For GET requests, value points to where to store the retrieved value.
-     */
-    struct request {
-        int key;
-        int *value;
-        RequestType type;
-        RequestStatus status;
-        Semaphore sema;
-    };
-
+ private:
     const std::string name;
     const int num_workers;
     const int num_cores;
-
-    struct synch_queue {
-      std::queue<request*> queue;
-      std::mutex queue_lock;
-      char padding[2*CACHE_LINE_SIZE - sizeof(std::queue<request>) - sizeof(std::mutex)];
-    };
-
+    bool should_stop;
+    
     /* Access using [worker cpu][client cpu]. */
     synch_queue **request_matrix;
-
-    struct worker_init_data {
-        std::string dir_name;
-        int core_id;
-        synch_queue *queues;
-        int num_queues;
-    };
-
-    std::vector<std::thread> workers;
 
     static void spawn_worker(worker_init_data init_data);
 };

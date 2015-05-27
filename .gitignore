@@ -1,6 +1,6 @@
 # Test files
 test/test_dump/*
-
+profiler/profiler_dump/*
 # Vagrant cache
 .vagrant*
 

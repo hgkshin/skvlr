@@ -12,7 +12,11 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <string.h>
+#include <string>
+
+const std::string TEST_DUMP_DIR = "test/test_dump/";
+bool prepare_for_next_suite(const std::string directory);
+int total_cores();
 
 /*
  * Typed versions of min() and max().
@@ -169,4 +173,10 @@ bool _run_suite(const char *name, void (*fn)(bool *result, int *_num_tests,
       int *_num_passed));
 
 int begin_testing(int, const char *argv[]);
+
+/*
+ * The test suites
+ */
+void basic_tests(bool *result, int *_num_tests, int *_num_passed);
+void single_thread_tests(bool *result, int *_num_tests, int *_num_passed);
 #endif

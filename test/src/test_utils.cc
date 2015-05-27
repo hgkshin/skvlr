@@ -16,7 +16,7 @@
 #include <sys/time.h>
 #include <errno.h>
 
-#include "test.h"
+#include "skvlr_test.h"
 
 /*
  * These are set to the color escape sequence if we're printing out to a
