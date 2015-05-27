@@ -40,7 +40,8 @@ static bool test_worker_persistence_single() {
     if (!prepare_worker_directory()) return false;
 
     Skvlr::synch_queue q;
-    Skvlr::worker_init_data data("worker", 0, &q, 1);
+    bool terminate = false;
+    Skvlr::worker_init_data data("worker", 0, &q, 1, &terminate);
 
     Worker w(data);
 
@@ -63,7 +64,8 @@ static bool test_worker_persistence_map() {
     if (!prepare_worker_directory()) return false;
 
     Skvlr::synch_queue q;
-    Skvlr::worker_init_data data("worker", 0, &q, 1);
+    bool terminate = false;
+    Skvlr::worker_init_data data("worker", 0, &q, 1, &terminate);
     Worker w(data);
     std::map<int, int> values;
     for (int i = 0; i < 1000; ++i) {
@@ -91,7 +93,8 @@ static bool test_worker_loads_from_file() {
 
     // Write values to one worker.
     Skvlr::synch_queue q;
-    Skvlr::worker_init_data data("worker", 0, &q, 1);
+    bool terminate = false;
+    Skvlr::worker_init_data data("worker", 0, &q, 1, &terminate);
     {
         // Create a separate scope to invoke the worker destructor.
         Worker w(data);
@@ -116,6 +119,13 @@ static bool test_worker_loads_from_file() {
     return true;
 }
 
+static bool test_skvlr_destructor() {
+    // The destructor should wait for threads to finish.  When test_kv goes out of scope, we
+    // will either thrown an exception if a thread gets abandoned or hang indefinitely if
+    // workers aren't joined properly.
+    Skvlr test_kv("test_db", 4);
+    return true;
+}
 
 // Time out value is set in test_utils.cc
 BEGIN_TEST_SUITE(sanity_checks) {
@@ -123,6 +133,7 @@ BEGIN_TEST_SUITE(sanity_checks) {
     run_test(test_worker_persistence_single);
     run_test(test_worker_persistence_map);
     run_test(test_worker_loads_from_file);
+    run_test(test_skvlr_destructor);
 }
 
 BEGIN_TESTING {

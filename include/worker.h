@@ -15,7 +15,6 @@ public:
 
     void listen();
 
-    // TODO (RR): Make these methods private but testable.
     void handle_get(Skvlr::request *req);
     void handle_put(Skvlr::request *req);
     int persist(const int key, const int value);

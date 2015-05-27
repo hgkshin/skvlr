@@ -29,7 +29,7 @@ void Worker::listen()
 {
     // check queues round-robin
     unsigned int curQueue = 0;
-    while(true) {
+    while(!*this->worker_data.should_exit) {
         Skvlr::synch_queue *queue = worker_data.queues + (curQueue);
         curQueue = (curQueue + 1) % worker_data.num_queues;
         queue->queue_lock.lock();

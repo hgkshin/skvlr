@@ -15,7 +15,7 @@
 
 Skvlr::Skvlr(const std::string &name, int num_workers)
   : name(name), num_workers(num_workers), num_cores(sysconf(_SC_NPROCESSORS_ONLN)),
-    workers(num_workers)
+    should_stop(false), workers(num_workers)
 {
     assert(num_workers <= num_cores);
     std::cout << "Commencing initialization of " << name << "." << std::endl;
@@ -36,13 +36,14 @@ Skvlr::Skvlr(const std::string &name, int num_workers)
 
     std::cout << "Spawning workers." << std::endl;
     for(int i = 0; i < num_workers; i++) {
-        worker_init_data init_data(name, i, request_matrix[i], num_cores);
+        worker_init_data init_data(name, i, request_matrix[i], num_cores, &should_stop);
         workers[i] = std::thread(&spawn_worker, init_data);
     }
 }
 
 Skvlr::~Skvlr()
 {
+    this->should_stop = true;
     for(auto& worker : workers) {
         worker.join();
     }
