@@ -27,19 +27,30 @@ Worker::~Worker()
  */
 void Worker::listen()
 {
+    // check queues round-robin
+    unsigned int curQueue = 0;
     while(true) {
-        /* TODO: If data exists handle it */
-        if (false) {
-            Skvlr::request *req; // TODO: pull from queue
-            switch(req->type) {
-                case Skvlr::GET:
-                    handle_get(req);
-                    break;
-                case Skvlr::PUT:
-                    handle_put(req);
-                    break;
-                default: assert(false); // sanity check
-            }
+        Skvlr::synch_queue *queue = worker_data.queues + (curQueue);
+        curQueue = (curQueue + 1) % worker_data.num_queues;
+        queue->queue_lock.lock();
+
+        if (queue->queue.empty()) {
+            queue->queue_lock.unlock();
+            continue;
+        }
+
+        Skvlr::request *req = queue->queue.front();
+        queue->queue.pop();
+        queue->queue_lock.unlock();
+
+        switch(req->type) {
+            case Skvlr::GET:
+                handle_get(req);
+                break;
+            case Skvlr::PUT:
+                handle_put(req);
+                break;
+            default: assert(false); // sanity check
         }
     }
 }
@@ -78,6 +89,10 @@ release_sema:
  * successfully or not.
  *
  * @param req PENDING PUT request to handle
+ *
+ * NOTE: we need to add a callback parameter to req if we wish to make the
+ * status of a request visible, as per the documentation above.  Right now, it's
+ * merely discarded immediately by deleting the request object.
  */
 void Worker::handle_put(Skvlr::request *req)
 {
@@ -85,7 +100,6 @@ void Worker::handle_put(Skvlr::request *req)
     assert(req->type == Skvlr::PUT);
     assert(req->status == Skvlr::PENDING);
 
-    // TODO: implement persisting the data, add to map if persistence succeeds
     int success = persist(req->key, *req->value);
     if (success != 0) {
       req->status = Skvlr::ERROR;
@@ -95,7 +109,7 @@ void Worker::handle_put(Skvlr::request *req)
     data.insert(std::pair<int, int>(req->key, *req->value));
     req->status = Skvlr::SUCCESS;
 
-    // TODO: need to free memory of req because it is dynamically allocated.
+    delete req;
 }
 
 /**

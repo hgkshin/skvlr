@@ -53,11 +53,11 @@ public:
     struct worker_init_data {
         const std::string dir_name;
         const int core_id;
-        const synch_queue *queues;
+        synch_queue *queues;
         const int num_queues;
 
         worker_init_data(const std::string dir_name, const int core_id,
-                         const synch_queue *queues, const int num_queues)
+                         synch_queue *queues, const int num_queues)
         :  dir_name(dir_name), core_id(core_id), queues(queues), num_queues(num_queues)
         {
             /* Empty */

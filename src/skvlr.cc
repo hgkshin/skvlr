@@ -98,6 +98,10 @@ int Skvlr::db_get(const int key, int *value)
  * Put data into the key-value store asynchronously.
  * @param key Key to insert data into.
  * @param value Value to insert
+ *
+ * NOTE: technically, callers of db_put cannot tell if their put
+ * succeeded or failed. Consider adding an optional callback
+ * parameter?
  */
 void Skvlr::db_put(const int key, int value)
 {

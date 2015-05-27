@@ -22,6 +22,6 @@ public:
 
 private:
     std::map<int, int> data;
-    const Skvlr::worker_init_data worker_data;
+    Skvlr::worker_init_data worker_data;
     std::ofstream outputLog;
 };
