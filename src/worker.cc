@@ -27,7 +27,7 @@ Worker::~Worker()
  */
 void Worker::listen()
 {
-    while(true) {
+    while(!*this->worker_data.should_exit) {
         /* TODO: If data exists handle it */
         if (false) {
             Skvlr::request *req; // TODO: pull from queue
