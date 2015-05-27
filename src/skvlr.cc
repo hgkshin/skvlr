@@ -84,8 +84,7 @@ int Skvlr::db_get(const int key, int *value)
     synch_queue.queue.push(&req);
     synch_queue.queue_lock.unlock();
 
-    // TODO: This blocks us
-    // req.sema.wait();
+    req.sema.wait();
     std::cout << "db_get " << key << " returned ";
     if(req.status == SUCCESS) {
         std::cout << *value << std::endl;
