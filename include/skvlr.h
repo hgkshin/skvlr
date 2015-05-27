@@ -31,13 +31,12 @@ public:
     enum RequestType { GET, PUT };
     enum RequestStatus { PENDING, SUCCESS, ERROR };
 
-    /**
-     * For PUT requests, value points to the value to store.
-     * For GET requests, value points to where to store the retrieved value.
-     */
     struct request {
         int key;
-        int *value;
+        union {
+            int value_to_store; // PUT requests only
+            int *return_value;  // GET requests only
+        };
         RequestType type;
         RequestStatus status;
         Semaphore sema;

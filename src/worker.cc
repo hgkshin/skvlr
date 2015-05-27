@@ -69,14 +69,18 @@ void Worker::handle_get(Skvlr::request *req)
     assert(req->type == Skvlr::GET);
     assert(req->status == Skvlr::PENDING);
 
+    std::cout << "handle_get: Getting key " << req->key << ", ";
+
     auto value = data.find(req->key);
     if (value == data.end()) {
+        std::cout << "not found!" << std::endl;
         req->status = Skvlr::ERROR;
         goto release_sema;
     }
 
-    *req->value = value->second;
+    *req->return_value = value->second;
     req->status = Skvlr::SUCCESS;
+    std::cout << "value: " << *req->return_value << std::endl;
 
 release_sema:
     req->sema.notify();
@@ -100,13 +104,16 @@ void Worker::handle_put(Skvlr::request *req)
     assert(req->type == Skvlr::PUT);
     assert(req->status == Skvlr::PENDING);
 
-    int success = persist(req->key, *req->value);
+    std::cout << "handle_put: putting (" << req->key << ", " <<
+        req->value_to_store << ")" << std::endl;
+
+    int success = persist(req->key, req->value_to_store);
     if (success != 0) {
       req->status = Skvlr::ERROR;
       return;
     }
 
-    data.insert(std::pair<int, int>(req->key, *req->value));
+    data.insert(std::pair<int, int>(req->key, req->value_to_store));
     req->status = Skvlr::SUCCESS;
 
     delete req;

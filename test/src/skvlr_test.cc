@@ -16,11 +16,16 @@ static bool test_valid_values() {
     for (int i = 0; i < 1000; i++) {
         test_kv.db_put(i, i);
     }
+
+    sleep(1);
+
     for (int i = 0; i < 1000; i++) {
         int value;
         test_kv.db_get(i, &value);
         check_eq(value, i);
     }
+
+    std::cout << "complete!" << std::endl;
     return true;
 }
 
@@ -101,7 +106,7 @@ static bool test_worker_loads_from_file() {
         int value;
         Skvlr::request req;
         req.key = i;
-        req.value = &value;
+        req.return_value = &value;
         req.type = Skvlr::RequestType::GET;
         req.status = Skvlr::RequestStatus::PENDING;
         secondWorker.handle_get(&req);

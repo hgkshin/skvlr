@@ -74,7 +74,7 @@ int Skvlr::db_get(const int key, int *value)
 
     request req;
     req.key = key;
-    req.value = value;
+    req.return_value = value;
     req.type = GET;
     req.status = PENDING;
 
@@ -116,7 +116,7 @@ void Skvlr::db_put(const int key, int value)
 
     request *req = new request;
     req->key = key;
-    req->value = &value;
+    req->value_to_store = value;
     req->type = PUT;
     req->status = PENDING;
 
