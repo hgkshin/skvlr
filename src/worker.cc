@@ -30,8 +30,8 @@ void Worker::listen()
     while(true) {
         /* TODO: If data exists handle it */
         if (false) {
-            Skvlr::request req; // TODO: pull from queue
-            switch(req.type) {
+            Skvlr::request *req; // TODO: pull from queue
+            switch(req->type) {
                 case Skvlr::GET:
                     handle_get(req);
                     break;
@@ -52,23 +52,23 @@ void Worker::listen()
  *
  * @param req PENDING GET request to handle
  */
-void Worker::handle_get(Skvlr::request &req)
+void Worker::handle_get(Skvlr::request *req)
 {
     // TODO: handle gets to other cores.
-    assert(req.type == Skvlr::GET);
-    assert(req.status == Skvlr::PENDING);
+    assert(req->type == Skvlr::GET);
+    assert(req->status == Skvlr::PENDING);
 
-    auto value = data.find(req.key);
+    auto value = data.find(req->key);
     if (value == data.end()) {
-        req.status = Skvlr::ERROR;
+        req->status = Skvlr::ERROR;
         goto release_sema;
     }
 
-    *req.value = value->second;
-    req.status = Skvlr::SUCCESS;
+    *req->value = value->second;
+    req->status = Skvlr::SUCCESS;
 
 release_sema:
-    req.sema.notify();
+    req->sema.notify();
 }
 
 /**
@@ -79,21 +79,23 @@ release_sema:
  *
  * @param req PENDING PUT request to handle
  */
-void Worker::handle_put(Skvlr::request &req)
+void Worker::handle_put(Skvlr::request *req)
 {
     /* Empty */
-    assert(req.type == Skvlr::PUT);
-    assert(req.status == Skvlr::PENDING);
+    assert(req->type == Skvlr::PUT);
+    assert(req->status == Skvlr::PENDING);
 
     // TODO: implement persisting the data, add to map if persistence succeeds
-    int success = persist(req.key, *req.value);
+    int success = persist(req->key, *req->value);
     if (success != 0) {
-      req.status = Skvlr::ERROR;
+      req->status = Skvlr::ERROR;
       return;
     }
 
-    data.insert(std::pair<int, int>(req.key, *req.value));
-    req.status = Skvlr::SUCCESS;
+    data.insert(std::pair<int, int>(req->key, *req->value));
+    req->status = Skvlr::SUCCESS;
+
+    // TODO: need to free memory of req because it is dynamically allocated.
 }
 
 /**

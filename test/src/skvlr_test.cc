@@ -104,7 +104,7 @@ static bool test_worker_loads_from_file() {
         req.value = &value;
         req.type = Skvlr::RequestType::GET;
         req.status = Skvlr::RequestStatus::PENDING;
-        secondWorker.handle_get(req);
+        secondWorker.handle_get(&req);
         check_eq(value, 2 * i);
     }
 

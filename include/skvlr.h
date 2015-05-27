@@ -26,7 +26,7 @@ public:
     int db_get(const int key, int *value);
 
     // Non-blocking
-    void db_put(const int key, const int value);
+    void db_put(const int key, int value);
 
     enum RequestType { GET, PUT };
     enum RequestStatus { PENDING, SUCCESS, ERROR };
@@ -44,9 +44,10 @@ public:
     };
 
     struct synch_queue {
-        std::queue<request> queue;
+        std::queue<request *> queue;
         std::mutex queue_lock;
-        char padding[2*CACHE_LINE_SIZE - sizeof(std::queue<request>) - sizeof(std::mutex)];
+        char padding[2*CACHE_LINE_SIZE - sizeof(std::queue<request>) -
+            sizeof(std::mutex)];
     };
 
     struct worker_init_data {
