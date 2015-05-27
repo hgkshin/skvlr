@@ -21,7 +21,7 @@ const int TOTAL_CORES = sysconf(_SC_NPROCESSORS_ONLN);
 const int NUM_OPS = 20000;
 
 // Varies proportion of gets to puts
-const double GET_FRAC = 0;
+const double GET_FRAC = 0.9;
 const int NUM_GETS = GET_FRAC * NUM_OPS;
 const int NUM_PUTS = (1 - GET_FRAC) * NUM_OPS;
 

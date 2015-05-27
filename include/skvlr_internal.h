@@ -11,6 +11,7 @@
 #define DEBUG_WORKER_FLAG true
 #define DEBUG_SKVLR_FLAG true
 #define DEBUG_TEST_FLAG true
+#define DEBUG_PROFILER_FLAG true
 
 #ifdef DEBUG_WORKER_FLAG
 #  define DEBUG_WORKER(x) std::cerr << "\033[1;34mWORKER LOG: " << x << "\033[0m"
@@ -28,6 +29,12 @@
 #  define DEBUG_TEST(x) std::cerr << "\033[1;33mTEST LOG: " << x << "\033[0m"
 #else
 #  define DEBUG_TEST(x) do {} while (0)
+#endif
+
+#ifdef DEBUG_PROFILER_FLAG
+#  define DEBUG_PROFILER(x) std::cerr << "\033[1;32mPROFILER LOG: " << x << "\033[0m"
+#else
+#  define DEBUG_PROFILER(x) do {} while (0)
 #endif
 
 #define CACHE_LINE_SIZE 64
