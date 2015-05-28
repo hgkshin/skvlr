@@ -7,8 +7,6 @@
 
 #pragma once
 
-#define UNUSED(x) (void)x;
-
 class Worker {
 public:
     Worker(const worker_init_data init_data);

@@ -7,6 +7,8 @@
 
 #pragma once
 
+#define UNUSED(x) (void)x;
+
 /* Debug macros per file type */
 // #define DEBUG_WORKER_FLAG true
 #define DEBUG_SKVLR_FLAG true

@@ -19,6 +19,9 @@ LDFLAGS = -pthread
 SKVLR_SOURCES = skvlr.cc worker.cc murmurhash3.cc
 SKVLR_OBJS = $(SKVLR_SOURCES:%.cc=$(OBJ_DIR)/%.o)
 
+UNSKVLR_SOURCES = unskvlr.cc
+UNSKVLR_OBJS = $(UNSKVLR_SOURCES:%.cc=$(OBJ_DIR)/%.o)
+
 TEST_SRCS = skvlr_test.cc basic_tests.cc single_thread_tests.cc test_utils.cc
 TEST_OBJS = $(TEST_SRCS:%.cc=$(OBJ_DIR)/%.o)
 TEST_BIN = $(BIN_DIR)/test
@@ -28,6 +31,7 @@ PROFILER_OBJS = $(PROFILER_SRCS:%.cc=$(OBJ_DIR)/%.o)
 PROFILER_BIN = $(BIN_DIR)/profiler
 
 LIBRARY_SKVLR = $(LIBS_DIR)/skvlr.a
+LIBRARY_UNSKVLR = $(LIBS_DIR)/unskvlr.a
 
 EXECUTABLES = $(TEST_BIN) $(PROFILER_BIN)
 
@@ -38,6 +42,10 @@ all: $(EXECUTABLES)
 $(LIBRARY_SKVLR): $(SKVLR_OBJS) | $(LIBS_DIR)
 	$(AR) $(LIBRARY_SKVLR) $(SKVLR_OBJS)
 	$(RANLIB) $(LIBRARY_SKVLR)
+
+$(LIBRARY_UNSKVLR): $(UNSKVLR_OBJS) | $(LIBS_DIR)
+	$(AR) $(LIBRARY_UNSKVLR) $(UNSKVLR_OBJS)
+	$(RANLIB) $(LIBRARY_UNSKVLR)
 
 $(BIN_DIR):
 	@mkdir -p $@
@@ -59,7 +67,7 @@ test: $(TEST_BIN)
 	@-$(TEST_BIN)
 	@-pkill test
 
-$(PROFILER_BIN): $(PROFILER_OBJS) $(LIBRARY_SKVLR) | $(BIN_DIR)
+$(PROFILER_BIN): $(PROFILER_OBJS) $(LIBRARY_SKVLR) $(LIBRARY_UNSKVLR) | $(BIN_DIR)
 	@echo + $@ [ld $^]
 	@$(CC) -o $@ $^ $(LDFLAGS)
 

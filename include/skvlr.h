@@ -7,10 +7,11 @@
 #include "semaphore.h"
 
 #include "skvlr_internal.h"
+#include "kvstore.h"
 
 #pragma once
 
-class Skvlr {
+class Skvlr : public KVStore {
     friend class Worker;
 
 public:
@@ -33,7 +34,7 @@ public:
     const int num_workers;
     const int num_cores;
     bool should_stop;
-    
+
     /* Access using [worker cpu][client cpu]. */
     synch_queue **request_matrix;
     static void spawn_worker(worker_init_data init_data);

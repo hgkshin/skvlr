@@ -13,6 +13,8 @@
 #include <assert.h>
 
 #include "skvlr.h"
+#include "unskvlr.h"
+#include "kvstore.h"
 #include "murmurhash3.h"
 #include "worker.h"
 
@@ -21,6 +23,8 @@ const std::string PROFILER_BASIC = PROFILER_DUMP_DIR + "profiler_basic_db";
 
 const int TOTAL_CORES = 8; //sysconf(_SC_NPROCESSORS_ONLN);
 const int NUM_OPS = 50000;
+
+const static bool TEST_BASELINE = false;
 
 // Varies proportion of gets to puts
 const double GET_FRAC = 0.9;
@@ -78,14 +82,14 @@ void generate_ops(std::vector<std::pair<int, int>> &ops, uint32_t ops_id) {
 }
 
 // Main function to apply get/put operations
-void run_ops(Skvlr *kv, int core_id, const std::vector<std::pair<int, int>> ops) {
+void run_ops(KVStore *kv, int core_id, const std::vector<std::pair<int, int>> ops) {
     /* Set up processor affinity. */
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
     CPU_SET(core_id, &cpuset);
     assert(!pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset));
 
-    
+
     for (size_t i = 0; i < ops.size(); i++) {
         if (ops[i].second == -1) {
             int val;
@@ -122,12 +126,17 @@ int main() {
     }
     // Runs for: 1, 2, 4 ... TOTAL_CORES
     for (int kv_cores = 1; kv_cores <= TOTAL_CORES; kv_cores++) {
-        Skvlr kv(PROFILER_BASIC, kv_cores);
+        KVStore *kv = NULL;
+        if (TEST_BASELINE) {
+            kv = new Unskvlr();
+        } else {
+            kv = new Skvlr(PROFILER_BASIC, kv_cores);
+        }
         std::vector<std::thread> threads(TOTAL_CORES);
 
         double start_time = get_wall_time();
         for (int client_thread = 0; client_thread < TOTAL_CORES; client_thread++) {
-            threads[client_thread] = std::thread(run_ops, &kv,
+            threads[client_thread] = std::thread(run_ops, kv,
                                                  client_thread, client_thread_ops[client_thread]);
             // TODO (kevinshin): Should kv be passed by reference?
         }
