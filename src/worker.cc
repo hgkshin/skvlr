@@ -34,8 +34,8 @@ void Worker::listen()
 {
     // check queues round-robin
     while(!*this->worker_data.should_exit) {
-        sleep(2);
-        printf("Waking up.\n");
+        int time = rand() % 10;
+        sleep(0.5 + time / 10.0);
         std::map<int, int> empty_puts;
         pthread_spin_lock(&this->worker_data.maps->puts_lock);
         empty_puts.swap(this->worker_data.maps->local_puts);
