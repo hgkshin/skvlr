@@ -62,16 +62,24 @@ struct synch_queue {
     char padding[2*CACHE_LINE_SIZE - sizeof(std::queue<request>) - sizeof(std::mutex)];
 };
 
+struct update_maps {
+    char foo[64];
+    std::map<int, int> local_state;
+    pthread_spinlock_t puts_lock;
+    std::map<int, int> local_puts;
+    char bar[64];
+};
+
 struct worker_init_data {
     const std::string dir_name;
     const int core_id;
-    synch_queue *queues;
+    update_maps *maps;
     const int num_queues;
     const bool *should_exit;
 
     worker_init_data(const std::string dir_name, const int core_id,
-                     synch_queue *queues, const int num_queues, const bool *should_exit)
-    :  dir_name(dir_name), core_id(core_id), queues(queues), num_queues(num_queues),
+                     update_maps *maps, const int num_queues, const bool *should_exit)
+    :  dir_name(dir_name), core_id(core_id), maps(maps), num_queues(num_queues),
         should_exit(should_exit)
     {
         /* Empty */

@@ -22,12 +22,12 @@ const std::string PROFILER_DUMP_DIR = "profiler/profiler_dump/";
 const std::string PROFILER_BASIC = PROFILER_DUMP_DIR + "profiler_basic_db";
 
 const int TOTAL_CORES = 8; //sysconf(_SC_NPROCESSORS_ONLN);
-const int NUM_OPS = 50000;
+const int NUM_OPS = 1000000;
 
 const static bool TEST_BASELINE = false;
 
 // Varies proportion of gets to puts
-const double GET_FRAC = 0.9;
+const double GET_FRAC = 0.95;
 const int NUM_GETS = GET_FRAC * NUM_OPS;
 const int NUM_PUTS = (1 - GET_FRAC) * NUM_OPS;
 
@@ -51,7 +51,7 @@ void generate_partitioned_keys(int num_keys, uint32_t ops_id, std::vector<int> &
     key++;
     MurmurHash3_x86_32(&key, sizeof(int), 0, &out);
   }
-  
+
   for (int i = 0; i < num_keys; i++) {
     keys.push_back(key);
   }
@@ -116,7 +116,7 @@ int main() {
     make_command += PROFILER_DUMP_DIR;
     assert(system(remove_command.c_str()) == 0);
     assert(system(make_command.c_str()) == 0);
- 
+
     std::vector<std::vector<std::pair<int, int>>> client_thread_ops;
 
     for (uint32_t i = 0; i < TOTAL_CORES; i++) {
@@ -132,10 +132,10 @@ int main() {
         } else {
             kv = new Skvlr(PROFILER_BASIC, kv_cores);
         }
-        std::vector<std::thread> threads(TOTAL_CORES);
+        std::vector<std::thread> threads(kv_cores);
 
         double start_time = get_wall_time();
-        for (int client_thread = 0; client_thread < TOTAL_CORES; client_thread++) {
+        for (int client_thread = 0; client_thread < kv_cores; client_thread++) {
             threads[client_thread] = std::thread(run_ops, kv,
                                                  client_thread, client_thread_ops[client_thread]);
             // TODO (kevinshin): Should kv be passed by reference?
@@ -145,14 +145,14 @@ int main() {
         }
         double end_time = get_wall_time();
         double duration = end_time - start_time;
-        
+
         /*DEBUG_PROFILER("Core speeds for " << kv_cores << " worker cores: " << std::endl);
         DEBUG_PROFILER("Duration: " << duration << std::endl);
         DEBUG_PROFILER("Number of client threads: " << TOTAL_CORES << std::endl);
         DEBUG_PROFILER("Number of operations per client thread: " << NUM_OPS << std::endl);
         DEBUG_PROFILER("Total operations / second: " << NUM_OPS / duration << std::endl);
         */
-        DEBUG_PROFILER(NUM_OPS/duration << std::endl);
+        DEBUG_PROFILER(NUM_OPS * kv_cores/duration << std::endl);
     }
     return 0;
 }

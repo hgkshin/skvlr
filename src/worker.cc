@@ -3,15 +3,16 @@
 
 #include "worker.h"
 
-Worker::Worker(const worker_init_data init_data)
-    : worker_data(init_data), outputLog(init_data.dataFilePath(), std::ios::app),
+Worker::Worker(const worker_init_data init_data, std::map<int, int> *global_state)
+    : global_state(global_state), worker_data(init_data),
+      outputLog(init_data.dataFilePath(), std::ios::app),
       total_gets(0), total_puts(0)
 {
     // Read the contents of the data file if any and store it in `data`.
     std::ifstream f(init_data.dataFilePath());
     int key, value;
     while (f >> key >> value) {
-        data[key] = value;
+        this->worker_data.maps->local_state[key] = value;
     }
     f.close();
 }
@@ -32,32 +33,47 @@ Worker::~Worker()
 void Worker::listen()
 {
     // check queues round-robin
-    unsigned int curQueue = 0;
     while(!*this->worker_data.should_exit) {
-        synch_queue *queue = worker_data.queues + (curQueue);
-        curQueue = (curQueue + 1) % worker_data.num_queues;
-        queue->queue_lock.lock();
+        sleep(2);
+        printf("Waking up.\n");
+        std::map<int, int> empty_puts;
+        pthread_spin_lock(&this->worker_data.maps->puts_lock);
+        empty_puts.swap(this->worker_data.maps->local_puts);
+        pthread_spin_unlock(&this->worker_data.maps->puts_lock);
 
-        if (queue->queue.empty()) {
-            queue->queue_lock.unlock();
-            continue;
+        global_state->insert(empty_puts.begin(), empty_puts.end());
+
+        this->worker_data.maps->local_state.insert(global_state->begin(), global_state->end());
+
+        for (auto kv : empty_puts) {
+            persist(kv.first, kv.second);
         }
+        // synch_queue *queue = worker_data.queues + (curQueue);
+        // curQueue = (curQueue + 1) % worker_data.num_queues;
+        // queue->queue_lock.lock();
 
-        request *req = queue->queue.front();
-        queue->queue.pop();
-        queue->queue_lock.unlock();
+        // if (queue->queue.empty()) {
+        //     queue->queue_lock.unlock();
+        //     continue;
+        // }
 
-        switch(req->type) {
-            case GET:
-                handle_get(req);
-                total_gets++;
-                break;
-            case PUT:
-                handle_put(req);
-                total_puts++;
-                break;
-            default: assert(false); // sanity check
-        } 
+        // request *req = queue->queue.front();
+        // queue->queue.pop();
+        // queue->queue_lock.unlock();
+
+        // switch(req->type) {
+        //     case GET:
+        //         handle_get(req);
+        //         total_gets++;
+        //         break;
+        //     case PUT:
+        //         handle_put(req);
+        //         total_puts++;
+        //         break;
+        //     default: assert(false); // sanity check
+        // }
+
+
     }
 }
 
@@ -71,22 +87,23 @@ void Worker::listen()
  */
 void Worker::handle_get(request *req)
 {
+    UNUSED(req);
     // TODO: handle gets to other cores.
-    assert(req->type == GET);
-    assert(req->status == PENDING);
+    // assert(req->type == GET);
+//     assert(req->status == PENDING);
 
-    auto value = data.find(req->key);
-    if (value == data.end()) {
-        //DEBUG_WORKER("Get not found!" << std::endl);
-        req->status = ERROR;
-        goto release_sema;
-    }
+//     auto value = data.find(req->key);
+//     if (value == data.end()) {
+//         //DEBUG_WORKER("Get not found!" << std::endl);
+//         req->status = ERROR;
+//         goto release_sema;
+//     }
 
-    *req->return_value = value->second;
-    req->status = SUCCESS;
+//     *req->return_value = value->second;
+//     req->status = SUCCESS;
 
-release_sema:
-    req->sema.notify();
+// release_sema:
+//     req->sema.notify();
 }
 
 /**
@@ -103,26 +120,27 @@ release_sema:
  */
 void Worker::handle_put(request *req)
 {
-    /* Empty */
-    assert(req->type == PUT);
-    assert(req->status == PENDING);
+    UNUSED(req);
+    // /* Empty */
+//     assert(req->type == PUT);
+//     assert(req->status == PENDING);
 
-    int success = persist(req->key, req->value_to_store);
-    if (success != 0) {
-      DEBUG_WORKER("handle_put failed\n");
-      req->status = ERROR;
-      goto release_sema;
-    }
+//     int success = persist(req->key, req->value_to_store);
+//     if (success != 0) {
+//       DEBUG_WORKER("handle_put failed\n");
+//       req->status = ERROR;
+//       goto release_sema;
+//     }
 
-    data.insert(std::pair<int, int>(req->key, req->value_to_store));
-    req->status = SUCCESS;
+//     data.insert(std::pair<int, int>(req->key, req->value_to_store));
+//     req->status = SUCCESS;
 
-release_sema:
-    if (req->synchronous) {
-        req->sema.notify();
-    } else {
-        delete req;
-    }
+// release_sema:
+//     if (req->synchronous) {
+//         req->sema.notify();
+//     } else {
+//         delete req;
+//     }
 }
 
 /**

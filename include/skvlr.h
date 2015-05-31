@@ -35,7 +35,13 @@ public:
     const int num_cores;
     bool should_stop;
 
+    char foo[64];
+    std::map<int, int> global_state;
+    char bar[64];
+
+    update_maps *data;
+
     /* Access using [worker cpu][client cpu]. */
     synch_queue **request_matrix;
-    static void spawn_worker(worker_init_data init_data);
+    static void spawn_worker(worker_init_data init_data, std::map<int, int> *global_state);
 };
