@@ -29,6 +29,7 @@ double KVProfiler::run_profiler() {
    
     // Statistics to help explain 
     double avg_duration_sum = 0;  
+    double median_duration_sum = 0;
     double max_duration_sum = 0;
     double min_duration_sum = 0;
     double real_duration_sum = 0;
@@ -47,11 +48,28 @@ double KVProfiler::run_profiler() {
         std::vector<std::thread> threads(this->total_cores);
         size_t total_num_ops = 0;
         
+        UNUSED(this->ready_threads_count);
+        this->ready_threads_count = 0;
+       
+
+        this->time_to_start = get_wall_time() + 1.8; 
         for (size_t client_id = 0; client_id < this->total_cores; client_id++) {
           total_num_ops += per_client_ops[client_id].size();
           threads[client_id] = std::thread(&KVProfiler::run_client, this, client_id,
                                            per_client_ops[client_id]);
         }
+        
+        /*while (true) {
+          this->ready_threads_m.lock();
+          if (this->ready_threads_count == this->total_cores) {
+            this->ready_threads_m.unlock();
+            break;
+          }
+          this->ready_threads_m.unlock();
+          sleep(0.1);
+        }
+        this->ready_threads_cv.notify_all(); */
+        
         
         for (auto &thread : threads) {
           thread.join();
@@ -65,6 +83,11 @@ double KVProfiler::run_profiler() {
         avg_duration /= this->total_cores; 
         avg_duration_sum += avg_duration;
         
+        // Calculate median thread duration
+        std::sort(durations.begin(), durations.end());
+        double median_duration = durations[durations.size()/2];
+        median_duration_sum += median_duration;
+
         // Calculate minimum/max thread duration
         double min_duration = *min_element(durations.begin(), durations.end());
         double max_duration = *max_element(durations.begin(), durations.end());
@@ -81,22 +104,23 @@ double KVProfiler::run_profiler() {
         start_offset_sum += *max_element(start_times.begin(), start_times.end()) - min_start_time;
         
         // Real Value
-        // Calculate throughput with either real or average
-        //throughput_trials_avg += (total_num_ops / average_thread_duration);
-        throughput_trials_sum += (total_num_ops / real_duration);
+        // Calculate throughput with either avg, median, or real
+        //throughput_trials_sum += (total_num_ops / avg_duration);
+        throughput_trials_sum += (total_num_ops / median_duration);
         
-
-
         //sleep(SLEEP_TIME);
     }
     DEBUG_PROFILER("Average thread duration across trials: " <<
                     avg_duration_sum/num_trials << std::endl); 
-    DEBUG_PROFILER("Real thread duration across trials: " <<
+    DEBUG_PROFILER("Median thread duration across trials: " <<
+                    median_duration_sum/num_trials << std::endl);
+    /*DEBUG_PROFILER("Real thread duration across trials: " <<
                     real_duration_sum/num_trials << std::endl);
     DEBUG_PROFILER("Min thread duration across trials: " <<
                     min_duration_sum/num_trials << std::endl);
     DEBUG_PROFILER("Max thread duration across trials: " <<
                     max_duration_sum/num_trials << std::endl);
+    */
     DEBUG_PROFILER("Start time offset across trials: " <<
                     start_offset_sum/num_trials << std::endl);
 
@@ -220,6 +244,18 @@ void KVProfiler::run_client(const size_t client_core, const std::vector<std::pai
 
     int curr_cpu = sched_getcpu();
     
+    /* Synchronization to get all threads to start roughly at the same time */
+    /*this->ready_threads_m.lock();
+    this->ready_threads_count++;
+    this->ready_threads_m.unlock();
+    std::unique_lock<std::mutex> lk(this->ready_threads_m);
+    ready_threads_cv.wait(lk, [&] {return this->ready_threads_count == this->total_cores;}); */
+
+    while (get_wall_time() < this->time_to_start) {
+      sleep(0.01);
+    }
+
+    /* Start measuring the operations */
     double start_time = get_wall_time();
     for (size_t i = 0; i < ops.size(); i++) {
         if (ops[i].second == -1) {

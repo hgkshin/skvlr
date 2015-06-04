@@ -31,9 +31,10 @@ class KVProfiler {
     std::vector<double> end_times;
     std::vector<double> durations;
     
-    /*std::mutex ready_threads_m;
+    std::mutex ready_threads_m;
     std::condition_variable ready_threads_cv;
-    size_t ready_threads_count; */
+    size_t ready_threads_count; 
+    double time_to_start;
 
     void generate_per_client_ops(std::vector<std::vector<std::pair<int, int>>> &per_client_ops);
     std::vector<std::pair<int, int>> generate_partitioned_ops(size_t num_ops,
