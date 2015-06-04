@@ -1,0 +1,3 @@
+[submodule "Hoard"]
+	path = Hoard
+	url = git@github.com:emeryberger/Hoard.git

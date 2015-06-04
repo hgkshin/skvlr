@@ -17,10 +17,9 @@ const std::string TEST_WORKER = TEST_DUMP_DIR + "worker";
 static bool test_valid_values() {
   Skvlr test_kv(TEST_VALID_VALUES, 1);
     for (int i = 0; i < 1000; i++) {
-        RequestStatus status;
-        test_kv.db_put(i, i, &status);
+        test_kv.db_put(i, i);
     }
-
+    test_kv.db_sync();
     for (int i = 0; i < 1000; i++) {
         int value;
         test_kv.db_get(i, &value);
@@ -34,11 +33,12 @@ static bool test_valid_values() {
 static bool test_worker_persistence_single() {
     if (!prepare_for_next_suite(TEST_WORKER)) return false;
 
-    synch_queue q;
+    update_maps q;
     bool terminate = false;
     worker_init_data data(TEST_WORKER.c_str(), 0, &q, 1, &terminate);
 
-    Worker w(data);
+    std::map<int, int> global_state;
+    Worker w(data, &global_state);
 
     w.persist(1, 2);
 
@@ -58,10 +58,11 @@ static bool test_worker_persistence_single() {
 static bool test_worker_persistence_map() {
     if (!prepare_for_next_suite(TEST_WORKER)) return false;
 
-    synch_queue q;
+    update_maps q;
     bool terminate = false;
     worker_init_data data(TEST_WORKER.c_str(), 0, &q, 1, &terminate);
-    Worker w(data);
+    std::map<int, int> global_state;
+    Worker w(data, &global_state);
     std::map<int, int> values;
     for (int i = 0; i < 1000; ++i) {
         values[i] = 2 * i;
@@ -87,28 +88,23 @@ static bool test_worker_loads_from_file() {
     if (!prepare_for_next_suite(TEST_WORKER)) return false;
 
     // Write values to one worker.
-    synch_queue q;
+    update_maps q;
     bool terminate = false;
     worker_init_data data(TEST_WORKER.c_str(), 0, &q, 1, &terminate);
+    std::map<int, int> global_state;
     {
         // Create a separate scope to invoke the worker destructor.
-        Worker w(data);
+        Worker w(data, &global_state);
         for (int i = 0; i < 1000; ++i) {
             w.persist(i, 2 * i);
         }
     }
+    sleep(1);
 
     // Start a second worker in the same directory.
-    Worker secondWorker(data);
+    Worker secondWorker(data, &global_state);
     for (int i = 0; i < 1000; ++i) {
-        int value;
-        request req;
-        req.key = i;
-        req.return_value = &value;
-        req.type = RequestType::GET;
-        req.status = RequestStatus::PENDING;
-        secondWorker.handle_get(&req);
-        check_eq(value, 2 * i);
+        check_eq(global_state[i], 2 * i);
     }
 
     return true;
@@ -120,6 +116,3 @@ BEGIN_TEST_SUITE(single_thread_tests) {
     run_test(test_worker_persistence_map);
     run_test(test_worker_loads_from_file);
 }
-
-
-

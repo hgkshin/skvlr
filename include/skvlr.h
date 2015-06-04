@@ -23,8 +23,9 @@ public:
     Skvlr(const Skvlr&) = delete;
 
     // Synchronous if status != NULL, Asynchronous if status == NULL
-    void db_get(const int key, int *value, RequestStatus *status=NULL);
-    void db_put(const int key, int value, RequestStatus *status=NULL);
+    void db_get(const int key, int *value, int curr_cpu = -1);
+    void db_put(const int key, int value,  int curr_cpu = -1);
+    void db_sync();
 
     // Public only for testing purposes
     std::vector<std::thread> workers;
@@ -33,9 +34,11 @@ public:
     const std::string name;
     const int num_workers;
     const int num_cores;
-    bool should_stop;
+
+    bool should_stop __attribute__((aligned(CACHE_LINE_SIZE)));;
+    std::map<int, int> global_state __attribute__((aligned(CACHE_LINE_SIZE)));;
+    update_maps *data __attribute__((aligned(CACHE_LINE_SIZE)));;
 
     /* Access using [worker cpu][client cpu]. */
-    synch_queue **request_matrix;
-    static void spawn_worker(worker_init_data init_data);
+    static void spawn_worker(worker_init_data init_data, std::map<int, int> *global_state);
 };

@@ -25,14 +25,15 @@ Skvlr::Skvlr(const std::string &name, int num_workers)
     }
     closedir(dir);
 
-    request_matrix = new synch_queue*[num_cores];
-    for(int i = 0; i < num_cores; i++) {
-        request_matrix[i] = new synch_queue[num_cores];
+    data = new update_maps[num_cores];
+    for (int i = 0; i < num_cores; ++i) {
+        pthread_spin_init(&data[i].puts_lock, 0);
     }
     for(int i = 0; i < num_workers; i++) {
-        worker_init_data init_data(name, i, request_matrix[i], num_cores, &should_stop);
-        workers[i] = std::thread(&spawn_worker, init_data);
+        worker_init_data init_data(name, i, &data[i], num_cores, &should_stop);
+        workers[i] = std::thread(&spawn_worker, init_data, &global_state);
     }
+
 }
 
 Skvlr::~Skvlr()
@@ -41,11 +42,6 @@ Skvlr::~Skvlr()
     for(auto& worker : workers) {
         worker.join();
     }
-
-    for(int i = 0; i < num_workers; i++) {
-        delete[] request_matrix[i];
-    }
-    delete[] request_matrix; 
 }
 
 /**
@@ -54,39 +50,16 @@ Skvlr::~Skvlr()
  * TODO: details about performance characteristics of this?
  * @param key Key to search for
  * @param value Pointer to where value should be stored.
- * @param status Callback RequestStatus if client wants return status
  */
-void Skvlr::db_get(const int key, int *value, RequestStatus *status)
+void Skvlr::db_get(const int key, int *value, int curr_cpu)
 {
-    uint32_t out;
-
-    MurmurHash3_x86_32(&key, sizeof(int), 0, &out);
-
-    int curr_cpu = sched_getcpu();
+    if (curr_cpu == -1) curr_cpu = sched_getcpu();
     if(curr_cpu < 0) {
-        if (status) {
-            *status = ERROR;
-        }
-        DEBUG_SKVLR("Current CPU < 0 on db_get\n"); 
+        DEBUG_SKVLR("Current CPU < 0 on db_get\n");
         return;
     }
 
-    request req;
-    req.key = key;
-    req.return_value = value;
-    req.synchronous = true;
-    req.type = GET;
-    req.status = PENDING;
-
-    synch_queue &synch_queue = request_matrix[out % num_workers][curr_cpu];
-    synch_queue.queue_lock.lock();
-    synch_queue.queue.push(&req);
-    synch_queue.queue_lock.unlock();
-
-    req.sema.wait();
-    if (status) {
-        *status = req.status;
-    }
+    *value = this->data[curr_cpu % num_workers].local_state[key];
 }
 
 /**
@@ -94,46 +67,27 @@ void Skvlr::db_get(const int key, int *value, RequestStatus *status)
  * depending on whether client passes in status.
  * @param key Key to insert data into.
  * @param value Value to insert
- * @param status Callback RequestStatus
- *  
+ * @curr_cpu optional The CPU the caller is running on.
  */
-void Skvlr::db_put(const int key, int value, RequestStatus *status)
+void Skvlr::db_put(const int key, int value, int curr_cpu)
 {
-    uint32_t out;
-    MurmurHash3_x86_32(&key, sizeof(int), 0, &out);
-
-    int curr_cpu = sched_getcpu();
+    if (curr_cpu == -1) curr_cpu = sched_getcpu();
     if (curr_cpu < 0) {
-        if (status) {
-            *status = ERROR;
-        }
         DEBUG_SKVLR("Current CPU < 0 on db_put\n");
         return;
     }
-     
-    request *req = new request;
-    req->key = key;
-    req->value_to_store = value;
-    req->synchronous = status ? true : false;
-    req->type = PUT;
-    req->status = PENDING;
 
-    /* Note: worker is responsible for freeing req's memory. */
-    synch_queue &synch_queue = request_matrix[out % num_workers][curr_cpu];
-    synch_queue.queue_lock.lock();
-    synch_queue.queue.push(req);
-    synch_queue.queue_lock.unlock();
-
-    /* Tell user if there are errors if they've passed in status:
-     * Synchronous in that case */
-    if (status) {
-        req->sema.wait();
-        *status = req->status;
-        delete req;
-    }
+    pthread_spin_lock(&this->data[curr_cpu % num_workers].puts_lock);
+    this->data[curr_cpu % num_workers].local_puts[key]  = value;
+    pthread_spin_unlock(&this->data[curr_cpu % num_workers].puts_lock);
 }
 
-void Skvlr::spawn_worker(worker_init_data init_data) {
+void Skvlr::db_sync()
+{
+    /* Empty */
+}
+
+void Skvlr::spawn_worker(worker_init_data init_data, std::map<int, int> *global_state) {
     /* Set up processor affinity. */
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
@@ -141,7 +95,7 @@ void Skvlr::spawn_worker(worker_init_data init_data) {
     assert(!pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset));
 
     /* Initialize worker. */
-    Worker worker(init_data);
+    Worker worker(init_data, global_state);
 
     /* Now worker loops infinitely. */
     worker.listen();
