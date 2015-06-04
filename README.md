@@ -7,11 +7,6 @@ To compile
 # Fetch Hoard dependencies
 git submodule update --init --recursive
 
-# Build Hoard
-cd Hoard/src
-make linux-gcc-x86-64
-cd -
-
 # Build SKVLR
 make
 

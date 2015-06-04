@@ -32,6 +32,7 @@ PROFILER_BIN = $(BIN_DIR)/profiler
 
 LIBRARY_SKVLR = $(LIBS_DIR)/skvlr.a
 LIBRARY_UNSKVLR = $(LIBS_DIR)/unskvlr.a
+LIBRARY_HOARD = Hoard/src/libhoard.so
 
 EXECUTABLES = $(TEST_BIN) $(PROFILER_BIN)
 
@@ -39,11 +40,15 @@ vpath % $(SRC_DIR) $(TEST_DIR) $(PROFILER_DIR)
 
 all: $(EXECUTABLES)
 
-$(LIBRARY_SKVLR): $(SKVLR_OBJS) | $(LIBS_DIR)
+$(LIBRARY_HOARD):
+	cd Hoard/src && git submodule update --init --recursive
+	make -C Hoard/src linux-gcc-x86-64
+
+$(LIBRARY_SKVLR): $(SKVLR_OBJS) $(LIBRARY_HOARD) | $(LIBS_DIR)
 	$(AR) $(LIBRARY_SKVLR) $(SKVLR_OBJS)
 	$(RANLIB) $(LIBRARY_SKVLR)
 
-$(LIBRARY_UNSKVLR): $(UNSKVLR_OBJS) | $(LIBS_DIR)
+$(LIBRARY_UNSKVLR): $(UNSKVLR_OBJS) $(LIBRARY_HOARD) | $(LIBS_DIR)
 	$(AR) $(LIBRARY_UNSKVLR) $(UNSKVLR_OBJS)
 	$(RANLIB) $(LIBRARY_UNSKVLR)
 
