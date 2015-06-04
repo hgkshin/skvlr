@@ -17,20 +17,16 @@
 KVProfiler::KVProfiler(KVStore *kv_store, size_t num_trials, size_t ops_per_trial,
                        size_t total_cores, KeyDistribution kd)
   : kv_store(kv_store), num_trials(num_trials), ops_per_trial(ops_per_trial),
-    total_cores(total_cores), kd(kd), SLEEP_TIME(2)
+    total_cores(total_cores), kd(kd), SLEEP_TIME(0.2)
 {}
 
 KVProfiler::~KVProfiler() {}
 
-
-void KVProfiler::no_op() {
-
-}
-
 double KVProfiler::run_profiler() {
     // Initial data structures
     double running_average = 0;
-
+    double running_thread_delay_avg = 0;
+   
     // Run Profiler 
     for (size_t trial = 0; trial < num_trials; trial++) {
         // Several key distributions are dependent on number of cores
@@ -46,16 +42,29 @@ double KVProfiler::run_profiler() {
           threads[client_id] = std::thread(&KVProfiler::run_client, this, client_id,
                                            per_client_ops[client_id]);
         }
+        
+        bool first_thread_joined = false;
+        double first_thread_finish_time = 0;
+        // This doesn't give much information if first thread is lagging
         for (auto &thread : threads) {
           thread.join();
+          if (!first_thread_joined) {
+            first_thread_finish_time = get_wall_time();
+            first_thread_joined = true;
+          }
         }
-        double end_time = get_wall_time();
-        double duration = end_time - start_time;
+        double last_thread_finish_time = get_wall_time();
+        double thread_difference = last_thread_finish_time - first_thread_finish_time; 
+        double duration = last_thread_finish_time - start_time;              
+        running_thread_delay_avg += thread_difference / duration;
+
         double total_ops_per_sec = total_num_ops / duration;
-        
         running_average += total_ops_per_sec;
         sleep(SLEEP_TIME);
     }
+    running_thread_delay_avg /= num_trials;
+    DEBUG_PROFILER("Average % of time spent waiting for lagging threads (estimate) : "
+                   << running_thread_delay_avg * 100 << "%" << std::endl);
     running_average /= num_trials;
     
     return running_average;
