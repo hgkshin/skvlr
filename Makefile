@@ -26,7 +26,7 @@ TEST_SRCS = skvlr_test.cc basic_tests.cc single_thread_tests.cc test_utils.cc
 TEST_OBJS = $(TEST_SRCS:%.cc=$(OBJ_DIR)/%.o)
 TEST_BIN = $(BIN_DIR)/test
 
-PROFILER_SRCS = skvlr_profiler.cc
+PROFILER_SRCS = skvlr_profiler_main.cc skvlr_profiler.cc
 PROFILER_OBJS = $(PROFILER_SRCS:%.cc=$(OBJ_DIR)/%.o)
 PROFILER_BIN = $(BIN_DIR)/profiler
 
