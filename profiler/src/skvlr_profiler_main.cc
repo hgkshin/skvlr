@@ -9,10 +9,11 @@
 #include "skvlr_internal.h"
 #include "skvlr.h"
 #include "unskvlr.h"
+#include "empty_skvlr.h"
 #include "kvstore.h"
 #include "worker.h"
 
-enum ExperimentType {SKVLR, UNSKVLR};
+enum ExperimentType {SKVLR, UNSKVLR, EMPTYSKVLR};
 
 void clean_up_dir() {
     // Prepare Directory
@@ -35,6 +36,8 @@ void run_experiment(ExperimentType type,
           kv = new Skvlr(kv_file, kv_cores);
         } else if (type == UNSKVLR) {
           kv = new Unskvlr();
+        } else if (type == EMPTYSKVLR) {
+          kv = new EmptySkvlr();
         }
         /* Ideally we'd also be able to try our previous implementation here */
 
@@ -49,16 +52,21 @@ void run_experiment(ExperimentType type,
 
 int main() {
     size_t TOTAL_CORES = 8; //sysconf(_SC_NPROCESSORS_ONLN);
-    size_t NUM_TRIALS = 7;
+    size_t NUM_TRIALS = 10;
     size_t NUM_OPS = 1000000;
 
     clean_up_dir();
+
+    //DEBUG_PROFILER("Running Profiler on Empty Skvlr....." << std::endl);
+    //run_experiment(EMPTYSKVLR, PROFILER_DUMP_DIR + "profiler_empty_get_db", PARTITION_GET_HEAVY,
+    //               TOTAL_CORES, NUM_TRIALS, NUM_OPS);
+    //DEBUG_PROFILER(std::endl);
+    
     DEBUG_PROFILER("Running Profiler on Skvlr (Get Heavy)....." << std::endl);
     run_experiment(SKVLR, PROFILER_DUMP_DIR + "profiler_skvlr_get_db", PARTITION_GET_HEAVY,
                    TOTAL_CORES, NUM_TRIALS, NUM_OPS);
 
     DEBUG_PROFILER(std::endl);
-    
     /*DEBUG_PROFILER("Running Profiler on Skvlr (Put Heavy)....." << std::endl);
     run_experiment(SKVLR, PROFILER_DUMP_DIR + "profiler_skvlr_put_db", PARTITION_PUT_HEAVY,
                    TOTAL_CORES, NUM_TRIALS, NUM_OPS);*/

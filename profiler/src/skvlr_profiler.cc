@@ -17,57 +17,90 @@
 KVProfiler::KVProfiler(KVStore *kv_store, size_t num_trials, size_t ops_per_trial,
                        size_t total_cores, KeyDistribution kd)
   : kv_store(kv_store), num_trials(num_trials), ops_per_trial(ops_per_trial),
-    total_cores(total_cores), kd(kd), SLEEP_TIME(0.2)
-{}
+    total_cores(total_cores), kd(kd), SLEEP_TIME(0)
+{
+}
 
 KVProfiler::~KVProfiler() {}
 
 double KVProfiler::run_profiler() {
-    // Initial data structures
-    double running_average = 0;
-    double running_thread_delay_avg = 0;
+    // Actual Scalability Data
+    double throughput_trials_sum = 0;
    
+    // Statistics to help explain 
+    double avg_duration_sum = 0;  
+    double max_duration_sum = 0;
+    double min_duration_sum = 0;
+    double real_duration_sum = 0;
+    double start_offset_sum = 0;
+
     // Run Profiler 
+    std::vector<std::vector<std::pair<int, int>>> per_client_ops(this->total_cores);
+    generate_per_client_ops(per_client_ops);
+    this->start_times.resize(total_cores); 
+    this->end_times.resize(total_cores);
+    this->durations.resize(total_cores);
+
     for (size_t trial = 0; trial < num_trials; trial++) {
         // Several key distributions are dependent on number of cores
         // Concern: is it a problem that keys change from experiment to experiment?
-        std::vector<std::vector<std::pair<int, int>>> per_client_ops(this->total_cores);
-        generate_per_client_ops(per_client_ops);
-
         std::vector<std::thread> threads(this->total_cores);
-        double start_time = get_wall_time(); 
         size_t total_num_ops = 0;
+        
         for (size_t client_id = 0; client_id < this->total_cores; client_id++) {
           total_num_ops += per_client_ops[client_id].size();
           threads[client_id] = std::thread(&KVProfiler::run_client, this, client_id,
                                            per_client_ops[client_id]);
         }
         
-        bool first_thread_joined = false;
-        double first_thread_finish_time = 0;
-        // This doesn't give much information if first thread is lagging
         for (auto &thread : threads) {
           thread.join();
-          if (!first_thread_joined) {
-            first_thread_finish_time = get_wall_time();
-            first_thread_joined = true;
-          }
         }
-        double last_thread_finish_time = get_wall_time();
-        double thread_difference = last_thread_finish_time - first_thread_finish_time; 
-        double duration = last_thread_finish_time - start_time;              
-        running_thread_delay_avg += thread_difference / duration;
+       
+        // Calculate avg thread duration 
+        double avg_duration = 0;
+        for (size_t i = 0; i < this->total_cores; i++) {
+          avg_duration += durations[i];
+        }
+        avg_duration /= this->total_cores; 
+        avg_duration_sum += avg_duration;
+        
+        // Calculate minimum/max thread duration
+        double min_duration = *min_element(durations.begin(), durations.end());
+        double max_duration = *max_element(durations.begin(), durations.end());
+        min_duration_sum += min_duration;
+        max_duration_sum += max_duration;
 
-        double total_ops_per_sec = total_num_ops / duration;
-        running_average += total_ops_per_sec;
-        sleep(SLEEP_TIME);
+        // Calculate real thread duration
+        double min_start_time = *min_element(start_times.begin(), start_times.end());
+        double max_end_time = *max_element(end_times.begin(), end_times.end());
+        double real_duration = max_end_time - min_start_time; 
+        real_duration_sum += real_duration;
+        
+        // Calculate start offset from max and min start
+        start_offset_sum += *max_element(start_times.begin(), start_times.end()) - min_start_time;
+        
+        // Real Value
+        // Calculate throughput with either real or average
+        //throughput_trials_avg += (total_num_ops / average_thread_duration);
+        throughput_trials_sum += (total_num_ops / real_duration);
+        
+
+
+        //sleep(SLEEP_TIME);
     }
-    running_thread_delay_avg /= num_trials;
-    DEBUG_PROFILER("Average % of time spent waiting for lagging threads (estimate) : "
-                   << running_thread_delay_avg * 100 << "%" << std::endl);
-    running_average /= num_trials;
-    
-    return running_average;
+    DEBUG_PROFILER("Average thread duration across trials: " <<
+                    avg_duration_sum/num_trials << std::endl); 
+    DEBUG_PROFILER("Real thread duration across trials: " <<
+                    real_duration_sum/num_trials << std::endl);
+    DEBUG_PROFILER("Min thread duration across trials: " <<
+                    min_duration_sum/num_trials << std::endl);
+    DEBUG_PROFILER("Max thread duration across trials: " <<
+                    max_duration_sum/num_trials << std::endl);
+    DEBUG_PROFILER("Start time offset across trials: " <<
+                    start_offset_sum/num_trials << std::endl);
+
+    return throughput_trials_sum / num_trials;
 }
 
 void KVProfiler::generate_per_client_ops(
@@ -186,6 +219,8 @@ void KVProfiler::run_client(const size_t client_core, const std::vector<std::pai
     assert(!pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset));
 
     int curr_cpu = sched_getcpu();
+    
+    double start_time = get_wall_time();
     for (size_t i = 0; i < ops.size(); i++) {
         if (ops[i].second == -1) {
             int val;
@@ -194,6 +229,12 @@ void KVProfiler::run_client(const size_t client_core, const std::vector<std::pai
             this->kv_store->db_put(ops[i].first, ops[i].second, curr_cpu);
         }
     }
+    double end_time = get_wall_time();
+    
+    // False sharing? Does it matter?
+    this->start_times[client_core] = start_time;
+    this->end_times[client_core] = end_time;
+    this->durations[client_core] = end_time - start_time;
 }
 
 double KVProfiler::get_wall_time() {

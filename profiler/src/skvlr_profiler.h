@@ -1,5 +1,6 @@
 #include <vector>
-
+#include <mutex>
+#include <condition_variable>
 #include "kvstore.h"
 
 #pragma once
@@ -25,7 +26,15 @@ class KVProfiler {
     size_t total_cores;
     KeyDistribution kd;
     const double SLEEP_TIME;
-   
+    
+    std::vector<double> start_times;
+    std::vector<double> end_times;
+    std::vector<double> durations;
+    
+    /*std::mutex ready_threads_m;
+    std::condition_variable ready_threads_cv;
+    size_t ready_threads_count; */
+
     void generate_per_client_ops(std::vector<std::vector<std::pair<int, int>>> &per_client_ops);
     std::vector<std::pair<int, int>> generate_partitioned_ops(size_t num_ops,
                                                               double get_prop,
