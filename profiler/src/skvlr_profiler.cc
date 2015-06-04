@@ -52,6 +52,7 @@ double KVProfiler::run_profiler() {
         double end_time = get_wall_time();
         double duration = end_time - start_time;
         double total_ops_per_sec = total_num_ops / duration;
+        
         running_average += total_ops_per_sec;
         sleep(SLEEP_TIME);
     }
@@ -64,17 +65,17 @@ void KVProfiler::generate_per_client_ops(
       std::vector<std::vector<std::pair<int, int>>> &per_client_ops) {
     for (size_t client_id = 0; client_id < per_client_ops.size(); client_id++) {
         if (this->kd == PARTITION_GET_HEAVY) {
-            per_client_ops[client_id] = generate_partitioned_ops(this->ops_per_trial, 0.90, 20,
+            per_client_ops[client_id] = generate_partitioned_ops(this->ops_per_trial, 0.95, 20,
                                                                  client_id);
         } else if (this->kd == PARTITION_PUT_HEAVY) {
             per_client_ops[client_id] = generate_partitioned_ops(this->ops_per_trial, 0.10, 20,
                                                                  client_id);
         } else if (this->kd == BASIC_GET_HEAVY) {
-            per_client_ops[client_id] = generate_basic_ops(this->ops_per_trial, 0.90);
+            per_client_ops[client_id] = generate_basic_ops(this->ops_per_trial, 0.95);
         } else if (this->kd == BASIC_PUT_HEAVY) {
             per_client_ops[client_id] = generate_basic_ops(this->ops_per_trial, 0.10);
         } else if (this->kd == HOT_KEYS_GET_HEAVY) {
-            per_client_ops[client_id] = generate_hot_key_ops(this->ops_per_trial, 0.10);
+            per_client_ops[client_id] = generate_hot_key_ops(this->ops_per_trial, 0.95);
         } else if (this->kd == HOT_KEYS_PUT_HEAVY) {
             per_client_ops[client_id] = generate_hot_key_ops(this->ops_per_trial, 0.10);
         }
