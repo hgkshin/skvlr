@@ -22,7 +22,7 @@ const std::string PROFILER_DUMP_DIR = "profiler/profiler_dump/";
 const std::string PROFILER_BASIC = PROFILER_DUMP_DIR + "profiler_basic_db";
 
 const int TOTAL_CORES = 8; //sysconf(_SC_NPROCESSORS_ONLN);
-const int NUM_OPS = 1000000;
+const int NUM_OPS = 10000000;
 
 const static bool TEST_BASELINE = false;
 
@@ -89,13 +89,13 @@ void run_ops(KVStore *kv, int core_id, const std::vector<std::pair<int, int>> op
     CPU_SET(core_id, &cpuset);
     assert(!pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset));
 
-
+    int curr_cpu = sched_getcpu();
     for (size_t i = 0; i < ops.size(); i++) {
         if (ops[i].second == -1) {
             int val;
-            kv->db_get(ops[i].first, &val);
+            kv->db_get(ops[i].first, &val, curr_cpu);
         } else {
-            kv->db_put(ops[i].first, ops[i].second);
+            kv->db_put(ops[i].first, ops[i].second, curr_cpu);
         }
     }
 }
@@ -152,7 +152,8 @@ int main() {
         DEBUG_PROFILER("Number of operations per client thread: " << NUM_OPS << std::endl);
         DEBUG_PROFILER("Total operations / second: " << NUM_OPS / duration << std::endl);
         */
-        DEBUG_PROFILER(NUM_OPS * kv_cores/duration << std::endl);
+        DEBUG_PROFILER(kv_cores << ": " << NUM_OPS * kv_cores/duration << std::endl);
+        sleep(5);
     }
     return 0;
 }

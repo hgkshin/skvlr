@@ -14,12 +14,10 @@ public:
 
     void listen();
 
-    void handle_get(request *req);
-    void handle_put(request *req);
     int persist(const int key, const int value);
 
 private:
-    std::map<int, int> *global_state;
+    std::map<int, int> *global_state ;
     worker_init_data worker_data;
     std::ofstream outputLog;
     unsigned int total_gets;

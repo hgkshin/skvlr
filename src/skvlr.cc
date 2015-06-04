@@ -50,40 +50,16 @@ Skvlr::~Skvlr()
  * TODO: details about performance characteristics of this?
  * @param key Key to search for
  * @param value Pointer to where value should be stored.
- * @param status Callback RequestStatus if client wants return status
  */
-void Skvlr::db_get(const int key, int *value, RequestStatus *status)
+void Skvlr::db_get(const int key, int *value, int curr_cpu)
 {
-    // uint32_t out;
-
-    // MurmurHash3_x86_32(&key, sizeof(int), 0, &out);
-
-    int curr_cpu = sched_getcpu();
+    if (curr_cpu == -1) curr_cpu = sched_getcpu();
     if(curr_cpu < 0) {
-        if (status) {
-            *status = ERROR;
-        }
         DEBUG_SKVLR("Current CPU < 0 on db_get\n");
         return;
     }
 
-    // request req;
-    // req.key = key;
-    // req.return_value = value;
-    // req.synchronous = true;
-    // req.type = GET;
-    // req.status = PENDING;
-
-    // synch_queue &synch_queue = request_matrix[curr_cpu % num_workers][curr_cpu];
-    // synch_queue.queue_lock.lock();
-    // synch_queue.queue.push(&req);
-    // synch_queue.queue_lock.unlock();
-
     *value = this->data[curr_cpu % num_workers].local_state[key];
-    // req.sema.wait();
-    // if (status) {
-    //     *status = req.status;
-    // }
 }
 
 /**
@@ -91,27 +67,24 @@ void Skvlr::db_get(const int key, int *value, RequestStatus *status)
  * depending on whether client passes in status.
  * @param key Key to insert data into.
  * @param value Value to insert
- * @param status Callback RequestStatus
- *
+ * @curr_cpu optional The CPU the caller is running on.
  */
-void Skvlr::db_put(const int key, int value, RequestStatus *status)
+void Skvlr::db_put(const int key, int value, int curr_cpu)
 {
-    // uint32_t out;
-    // MurmurHash3_x86_32(&key, sizeof(int), 0, &out);
-
-    int curr_cpu = sched_getcpu();
+    if (curr_cpu == -1) curr_cpu = sched_getcpu();
     if (curr_cpu < 0) {
-        if (status) {
-            *status = ERROR;
-        }
         DEBUG_SKVLR("Current CPU < 0 on db_put\n");
         return;
     }
 
-    this->data[curr_cpu % num_workers].local_state[key] = value;
     pthread_spin_lock(&this->data[curr_cpu % num_workers].puts_lock);
     this->data[curr_cpu % num_workers].local_puts[key]  = value;
     pthread_spin_unlock(&this->data[curr_cpu % num_workers].puts_lock);
+}
+
+void Skvlr::db_sync()
+{
+    /* Empty */
 }
 
 void Skvlr::spawn_worker(worker_init_data init_data, std::map<int, int> *global_state) {

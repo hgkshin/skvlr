@@ -20,9 +20,8 @@ public:
     Unskvlr & operator=(const Unskvlr&) = delete;
     Unskvlr(const Unskvlr&) = delete;
 
-    // Synchronous if status != NULL, Asynchronous if status == NULL
-    void db_get(const int key, int *value, RequestStatus *status=NULL);
-    void db_put(const int key, int value, RequestStatus *status=NULL);
+    void db_get(const int key, int *value, int curr_cpu = -1);
+    void db_put(const int key, int value,  int curr_cpu = -1);
 
  private:
     std::map<int, int> data;

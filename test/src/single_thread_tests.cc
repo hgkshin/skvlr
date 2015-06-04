@@ -17,10 +17,9 @@ const std::string TEST_WORKER = TEST_DUMP_DIR + "worker";
 static bool test_valid_values() {
   Skvlr test_kv(TEST_VALID_VALUES, 1);
     for (int i = 0; i < 1000; i++) {
-        RequestStatus status;
-        test_kv.db_put(i, i, &status);
+        test_kv.db_put(i, i);
     }
-
+    test_kv.db_sync();
     for (int i = 0; i < 1000; i++) {
         int value;
         test_kv.db_get(i, &value);
@@ -100,18 +99,12 @@ static bool test_worker_loads_from_file() {
             w.persist(i, 2 * i);
         }
     }
+    sleep(1);
 
     // Start a second worker in the same directory.
     Worker secondWorker(data, &global_state);
     for (int i = 0; i < 1000; ++i) {
-        int value;
-        request req;
-        req.key = i;
-        req.return_value = &value;
-        req.type = RequestType::GET;
-        req.status = RequestStatus::PENDING;
-        secondWorker.handle_get(&req);
-        check_eq(value, 2 * i);
+        check_eq(global_state[i], 2 * i);
     }
 
     return true;

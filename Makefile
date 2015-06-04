@@ -14,7 +14,7 @@ CC = g++
 CCFLAGS = -ggdb -Wall -Wextra -Werror -Wwrite-strings \
         -O2 -Iinclude -Itest/include -std=c++11 -pthread \
         -I$(LIBS_INCLUDE_DIR)
-LDFLAGS = -pthread
+LDFLAGS = -pthread -LHoard/src/ -l:libhoard.so
 
 SKVLR_SOURCES = skvlr.cc worker.cc murmurhash3.cc
 SKVLR_OBJS = $(SKVLR_SOURCES:%.cc=$(OBJ_DIR)/%.o)

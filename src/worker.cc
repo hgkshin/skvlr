@@ -13,6 +13,8 @@ Worker::Worker(const worker_init_data init_data, std::map<int, int> *global_stat
     int key, value;
     while (f >> key >> value) {
         this->worker_data.maps->local_state[key] = value;
+        // TODO: Acquire global lock here.
+        // global_state->insert(std::make_pair(key, value));
     }
     f.close();
 }
@@ -32,115 +34,23 @@ Worker::~Worker()
  */
 void Worker::listen()
 {
-    // check queues round-robin
     while(!*this->worker_data.should_exit) {
-        int time = rand() % 10;
-        sleep(0.5 + time / 10.0);
-        std::map<int, int> empty_puts;
+        int time = this->worker_data.core_id % 10;
+        sleep(10 + time / 10.0);
+
+        std::map<int, int> core_local_puts;
         pthread_spin_lock(&this->worker_data.maps->puts_lock);
-        empty_puts.swap(this->worker_data.maps->local_puts);
+        core_local_puts.swap(this->worker_data.maps->local_puts);
         pthread_spin_unlock(&this->worker_data.maps->puts_lock);
 
-        global_state->insert(empty_puts.begin(), empty_puts.end());
+        global_state->insert(core_local_puts.begin(), core_local_puts.end());
 
         this->worker_data.maps->local_state.insert(global_state->begin(), global_state->end());
 
-        for (auto kv : empty_puts) {
+        for (auto kv : core_local_puts) {
             persist(kv.first, kv.second);
         }
-        // synch_queue *queue = worker_data.queues + (curQueue);
-        // curQueue = (curQueue + 1) % worker_data.num_queues;
-        // queue->queue_lock.lock();
-
-        // if (queue->queue.empty()) {
-        //     queue->queue_lock.unlock();
-        //     continue;
-        // }
-
-        // request *req = queue->queue.front();
-        // queue->queue.pop();
-        // queue->queue_lock.unlock();
-
-        // switch(req->type) {
-        //     case GET:
-        //         handle_get(req);
-        //         total_gets++;
-        //         break;
-        //     case PUT:
-        //         handle_put(req);
-        //         total_puts++;
-        //         break;
-        //     default: assert(false); // sanity check
-        // }
-
-
     }
-}
-
-/**
- * Handle a get request. Retreives data corresponding to req.key from memory,
- * since all data is assumed to fit in memory.  Synchronous, so this releases
- * req's semaphore before exiting.  Success/failure of the request is stored in
- * req.status.
- *
- * @param req PENDING GET request to handle
- */
-void Worker::handle_get(request *req)
-{
-    UNUSED(req);
-    // TODO: handle gets to other cores.
-    // assert(req->type == GET);
-//     assert(req->status == PENDING);
-
-//     auto value = data.find(req->key);
-//     if (value == data.end()) {
-//         //DEBUG_WORKER("Get not found!" << std::endl);
-//         req->status = ERROR;
-//         goto release_sema;
-//     }
-
-//     *req->return_value = value->second;
-//     req->status = SUCCESS;
-
-// release_sema:
-//     req->sema.notify();
-}
-
-/**
- * Handle an incoming put request. Asynchronous, so it attempts to persist the
- * key and stores the new value in the worker's internal map if persisting
- * succeeds. Inspect req.status to determine if the persistence has completed
- * successfully or not.
- *
- * @param req PENDING PUT request to handle
- *
- * NOTE: we need to add a callback parameter to req if we wish to make the
- * status of a request visible, as per the documentation above.  Right now, it's
- * merely discarded immediately by deleting the request object.
- */
-void Worker::handle_put(request *req)
-{
-    UNUSED(req);
-    // /* Empty */
-//     assert(req->type == PUT);
-//     assert(req->status == PENDING);
-
-//     int success = persist(req->key, req->value_to_store);
-//     if (success != 0) {
-//       DEBUG_WORKER("handle_put failed\n");
-//       req->status = ERROR;
-//       goto release_sema;
-//     }
-
-//     data.insert(std::pair<int, int>(req->key, req->value_to_store));
-//     req->status = SUCCESS;
-
-// release_sema:
-//     if (req->synchronous) {
-//         req->sema.notify();
-//     } else {
-//         delete req;
-//     }
 }
 
 /**
