@@ -36,7 +36,7 @@ void Worker::listen()
         global_state->lock();
         global_state->global_data.insert(core_local_puts.begin(), core_local_puts.end());
 
-        this->worker_data.maps->local_state.insert(
+        this->worker_data.maps->local_state->insert(
             global_state->global_data.begin(), global_state->global_data.end());
 
 

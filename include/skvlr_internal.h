@@ -44,7 +44,7 @@
 #define CACHE_LINE_SIZE 64
 
 struct update_maps {
-    std::map<int, int> local_state;
+    std::map<int, int> *local_state;
     pthread_spinlock_t puts_lock;
     std::map<int, int> local_puts;
 } __attribute__((aligned(CACHE_LINE_SIZE)));

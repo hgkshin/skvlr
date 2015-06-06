@@ -8,6 +8,7 @@
 #include <map>
 #include <thread>
 #include <vector>
+#include <stdexcept>
 
 #include "skvlr.h"
 #include "murmurhash3.h"
@@ -23,6 +24,7 @@ Skvlr::Skvlr(const std::string &name, int num_workers)
     data = new update_maps[num_cores];
     for (int i = 0; i < num_cores; ++i) {
         pthread_spin_init(&data[i].puts_lock, 0);
+        data[i].local_state = new std::map<int, int>();
     }
     for(int i = 0; i < num_workers; i++) {
         worker_init_data init_data(name, i, &data[i], num_cores, &should_stop);
@@ -53,7 +55,11 @@ void Skvlr::db_get(const int key, int *value, int curr_cpu)
         return;
     }
 
-    *value = this->data[curr_cpu % num_workers].local_state[key];
+    try {
+        *value = this->data[curr_cpu % num_workers].local_state->at(key);
+    } catch (const std::out_of_range& err) {
+        *value = 0;
+    }
 }
 
 /**
