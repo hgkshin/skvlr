@@ -86,7 +86,14 @@ struct global_state {
 
     global_state(const std::string& file_name) 
     : outputLog(file_name) {
-      pthread_spin_init(&global_state_lock, PTHREAD_PROCESS_SHARED);
+        pthread_spin_init(&global_state_lock, PTHREAD_PROCESS_SHARED);
+        // Read the contents of the data file if any and store it in `data`.
+        std::ifstream f(file_name);
+        int key, value;
+        while (f >> key >> value) {
+            global_data[key] = value;
+        }
+        f.close();
     }
 
     void lock() {

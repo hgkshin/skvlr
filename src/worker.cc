@@ -5,18 +5,9 @@
 
 Worker::Worker(const worker_init_data init_data, struct global_state *global_state)
     : global_state(global_state), worker_data(init_data),
-      outputLog(init_data.dataFilePath(), std::ios::app),
       total_gets(0), total_puts(0)
 {
-    // Read the contents of the data file if any and store it in `data`.
-    std::ifstream f(init_data.dataFilePath());
-    int key, value;
-    while (f >> key >> value) {
-        this->worker_data.maps->local_state[key] = value;
-        // TODO: Acquire global lock here.
-        // global_state->insert(std::make_pair(key, value));
-    }
-    f.close();
+    // empty
 }
 
 Worker::~Worker()
@@ -25,7 +16,6 @@ Worker::~Worker()
                  << total_gets << std::endl);
     DEBUG_WORKER("Total puts for core #" << worker_data.core_id << ": "
                  << total_puts << std::endl);
-    outputLog.close();
 }
 
 /**
@@ -43,24 +33,28 @@ void Worker::listen()
         core_local_puts.swap(this->worker_data.maps->local_puts);
         pthread_spin_unlock(&this->worker_data.maps->puts_lock);
 
+        global_state->lock();
         global_state->global_data.insert(core_local_puts.begin(), core_local_puts.end());
 
         this->worker_data.maps->local_state.insert(
             global_state->global_data.begin(), global_state->global_data.end());
 
+
         for (auto kv : core_local_puts) {
             persist(kv.first, kv.second);
         }
+        global_state->unlock();
     }
 }
 
 /**
- * Persist a key-value pair in this worker's disk.
+ * Persist a key-value pair in this worker's disk. Assumes a lock on
+ * the global state is held.
  *
  * @return 0 on success, or a negative value on failure.
  */
 int Worker::persist(const int key, const int value)
 {
-    outputLog << key << '\t' << value << '\n' << std::flush;
+    global_state->outputLog << key << '\t' << value << '\n' << std::flush;
     return 0;
 }

@@ -19,7 +19,6 @@ public:
 private:
     struct global_state *global_state;
     worker_init_data worker_data;
-    std::ofstream outputLog;
     unsigned int total_gets;
     unsigned int total_puts;
 };

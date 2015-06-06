@@ -19,12 +19,6 @@ Skvlr::Skvlr(const std::string &name, int num_workers)
     global_state(name)
 {
     assert(num_workers <= num_cores);
-    DIR *dir = opendir(name.c_str());
-    if(!dir) {
-        DEBUG_SKVLR("Directory " << name << " doesn't exist, so we create it." << std::endl);
-        assert(mkdir(name.c_str(), 777) == 0);
-    }
-    closedir(dir);
 
     data = new update_maps[num_cores];
     for (int i = 0; i < num_cores; ++i) {
