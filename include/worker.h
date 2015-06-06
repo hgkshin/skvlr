@@ -14,7 +14,7 @@ public:
 
     void listen();
 
-    int persist(const int key, const int value);
+    int persist(const std::map<int, int>& puts);
 
 private:
     struct global_state *global_state;

@@ -46,6 +46,8 @@
 struct update_maps {
     std::map<int, int> *local_state;
     pthread_spinlock_t puts_lock;
+    // Can't this just be a vector? That'll be less overhead;
+    // it's not like we need O(1) random access.
     std::map<int, int> local_puts;
 } __attribute__((aligned(CACHE_LINE_SIZE)));
 

@@ -50,21 +50,24 @@ void Worker::listen()
         old_state = this->worker_data.maps->local_state;
         this->worker_data.maps->local_state = new_state;
 
-        for (auto kv : core_local_puts) {
-            persist(kv.first, kv.second);
-        }
+        // If we're okay with a looser persistence model, we
+        // can move this oepration to after the unlock.
+        persist(core_local_puts);
         global_state->unlock();
     }
 }
 
 /**
- * Persist a key-value pair in this worker's disk. Assumes a lock on
- * the global state is held.
+ * Persist a map of puts.
  *
  * @return 0 on success, or a negative value on failure.
  */
-int Worker::persist(const int key, const int value)
+int Worker::persist(const std::map<int, int>& puts)
 {
-    global_state->outputLog << key << '\t' << value << '\n' << std::flush;
+    for (auto kv: puts) {
+        global_state->outputLog << kv.first << '\t' << kv.second << '\n';
+    }
+    global_state->outputLog << std::flush;
+
     return 0;
 }

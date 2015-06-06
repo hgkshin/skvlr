@@ -40,7 +40,9 @@ static bool test_worker_persistence_single() {
     struct global_state global_state("blah");//TODO: update this
     Worker w(data, &global_state);
 
-    w.persist(1, 2);
+    std::map<int, int> puts_map;
+    puts_map[1] = 2;
+    w.persist(puts_map);
 
     std::fstream outputFile(data.dataFilePath());
     check(outputFile.good());
@@ -66,8 +68,8 @@ static bool test_worker_persistence_map() {
     std::map<int, int> values;
     for (int i = 0; i < 1000; ++i) {
         values[i] = 2 * i;
-        w.persist(i, values[i]);
     }
+    w.persist(values);
 
     std::fstream outputFile(data.dataFilePath());
     check(outputFile.good());
@@ -95,9 +97,11 @@ static bool test_worker_loads_from_file() {
     {
         // Create a separate scope to invoke the worker destructor.
         Worker w(data, &global_state);
+        std::map<int, int> local_puts;
         for (int i = 0; i < 1000; ++i) {
-            w.persist(i, 2 * i);
+            local_puts[i] = 2*i;
         }
+        w.persist(local_puts);
     }
     sleep(1);
 
