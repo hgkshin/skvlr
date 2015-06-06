@@ -9,7 +9,7 @@
 
 class Worker {
 public:
-    Worker(const worker_init_data init_data, std::map<int, int> *global_state);
+    Worker(const worker_init_data init_data, struct global_state *global_state);
     ~Worker();
 
     void listen();
@@ -17,7 +17,7 @@ public:
     int persist(const int key, const int value);
 
 private:
-    std::map<int, int> *global_state ;
+    struct global_state *global_state;
     worker_init_data worker_data;
     std::ofstream outputLog;
     unsigned int total_gets;

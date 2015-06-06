@@ -37,7 +37,7 @@ static bool test_worker_persistence_single() {
     bool terminate = false;
     worker_init_data data(TEST_WORKER.c_str(), 0, &q, 1, &terminate);
 
-    std::map<int, int> global_state;
+    struct global_state global_state("blah");//TODO: update this
     Worker w(data, &global_state);
 
     w.persist(1, 2);
@@ -61,7 +61,7 @@ static bool test_worker_persistence_map() {
     update_maps q;
     bool terminate = false;
     worker_init_data data(TEST_WORKER.c_str(), 0, &q, 1, &terminate);
-    std::map<int, int> global_state;
+    struct global_state global_state("blah"); // TODO: update this to correct file name
     Worker w(data, &global_state);
     std::map<int, int> values;
     for (int i = 0; i < 1000; ++i) {
@@ -91,7 +91,7 @@ static bool test_worker_loads_from_file() {
     update_maps q;
     bool terminate = false;
     worker_init_data data(TEST_WORKER.c_str(), 0, &q, 1, &terminate);
-    std::map<int, int> global_state;
+    struct global_state global_state("blah");//TODO: update this to correct name
     {
         // Create a separate scope to invoke the worker destructor.
         Worker w(data, &global_state);
@@ -104,7 +104,7 @@ static bool test_worker_loads_from_file() {
     // Start a second worker in the same directory.
     Worker secondWorker(data, &global_state);
     for (int i = 0; i < 1000; ++i) {
-        check_eq(global_state[i], 2 * i);
+        check_eq(global_state.global_data[i], 2 * i);
     }
 
     return true;

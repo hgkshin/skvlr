@@ -3,7 +3,7 @@
 
 #include "worker.h"
 
-Worker::Worker(const worker_init_data init_data, std::map<int, int> *global_state)
+Worker::Worker(const worker_init_data init_data, struct global_state *global_state)
     : global_state(global_state), worker_data(init_data),
       outputLog(init_data.dataFilePath(), std::ios::app),
       total_gets(0), total_puts(0)
@@ -43,9 +43,10 @@ void Worker::listen()
         core_local_puts.swap(this->worker_data.maps->local_puts);
         pthread_spin_unlock(&this->worker_data.maps->puts_lock);
 
-        global_state->insert(core_local_puts.begin(), core_local_puts.end());
+        global_state->global_data.insert(core_local_puts.begin(), core_local_puts.end());
 
-        this->worker_data.maps->local_state.insert(global_state->begin(), global_state->end());
+        this->worker_data.maps->local_state.insert(
+            global_state->global_data.begin(), global_state->global_data.end());
 
         for (auto kv : core_local_puts) {
             persist(kv.first, kv.second);

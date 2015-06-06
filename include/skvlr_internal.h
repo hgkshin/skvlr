@@ -5,6 +5,7 @@
 #include <thread>
 #include <queue>
 #include <sstream>
+#include <fstream>
 
 #pragma once
 
@@ -75,5 +76,24 @@ struct worker_init_data {
         std::stringstream ss;
         ss << this->dir_name << "/" << dataFileName();
         return ss.str();
+    }
+};
+
+struct global_state {
+    std::map<int, int> global_data;
+    std::ofstream outputLog;
+    pthread_spinlock_t global_state_lock;
+
+    global_state(const std::string& file_name) 
+    : outputLog(file_name) {
+      pthread_spin_init(&global_state_lock, PTHREAD_PROCESS_SHARED);
+    }
+
+    void lock() {
+      pthread_spin_lock(&global_state_lock);
+    }
+
+    void unlock() {
+      pthread_spin_unlock(&global_state_lock);
     }
 };

@@ -36,9 +36,10 @@ public:
     const int num_cores;
 
     bool should_stop __attribute__((aligned(CACHE_LINE_SIZE)));;
-    std::map<int, int> global_state __attribute__((aligned(CACHE_LINE_SIZE)));;
+    struct global_state global_state __attribute__((aligned(CACHE_LINE_SIZE)));;
     update_maps *data __attribute__((aligned(CACHE_LINE_SIZE)));;
 
     /* Access using [worker cpu][client cpu]. */
-    static void spawn_worker(worker_init_data init_data, std::map<int, int> *global_state);
+    static void spawn_worker(worker_init_data init_data,
+                             struct global_state *global_state);
 };

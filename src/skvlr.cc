@@ -15,7 +15,8 @@
 
 Skvlr::Skvlr(const std::string &name, int num_workers)
   : workers(num_workers), name(name), num_workers(num_workers),
-    num_cores(sysconf(_SC_NPROCESSORS_ONLN)), should_stop(false)
+    num_cores(sysconf(_SC_NPROCESSORS_ONLN)), should_stop(false),
+    global_state(name)
 {
     assert(num_workers <= num_cores);
     DIR *dir = opendir(name.c_str());
@@ -33,7 +34,6 @@ Skvlr::Skvlr(const std::string &name, int num_workers)
         worker_init_data init_data(name, i, &data[i], num_cores, &should_stop);
         workers[i] = std::thread(&spawn_worker, init_data, &global_state);
     }
-
 }
 
 Skvlr::~Skvlr()
@@ -87,7 +87,7 @@ void Skvlr::db_sync()
     /* Empty */
 }
 
-void Skvlr::spawn_worker(worker_init_data init_data, std::map<int, int> *global_state) {
+void Skvlr::spawn_worker(worker_init_data init_data, struct global_state *global_state) {
     /* Set up processor affinity. */
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
