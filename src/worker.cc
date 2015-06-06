@@ -24,9 +24,16 @@ Worker::~Worker()
  */
 void Worker::listen()
 {
+  std::map<int, int> *old_state = NULL;
     while(!*this->worker_data.should_exit) {
         int time = this->worker_data.core_id % 10;
         sleep(10 + time / 10.0);
+
+        // We figure most gets on the old map are done by the time
+        // we're swapping out the map.
+        if(old_state != NULL) {
+            delete old_state;
+        }
 
         std::map<int, int> core_local_puts;
         pthread_spin_lock(&this->worker_data.maps->puts_lock);
@@ -36,9 +43,12 @@ void Worker::listen()
         global_state->lock();
         global_state->global_data.insert(core_local_puts.begin(), core_local_puts.end());
 
-        this->worker_data.maps->local_state->insert(
-            global_state->global_data.begin(), global_state->global_data.end());
+        std::map<int, int> *new_state = new std::map<int, int>(
+            global_state->global_data.begin(), global_state->global_data.end());                                                              
 
+        // TODO: THIS IS SO SO SO UNSAFE YIKES.
+        old_state = this->worker_data.maps->local_state;
+        this->worker_data.maps->local_state = new_state;
 
         for (auto kv : core_local_puts) {
             persist(kv.first, kv.second);
