@@ -25,8 +25,9 @@ public:
     // Synchronous if status != NULL, Asynchronous if status == NULL
     void db_get(const int key, int *value, int curr_cpu = -1);
     void db_put(const int key, int value,  int curr_cpu = -1);
-    void db_sync();
+    void db_sync(int curr_cpu = -1);
 
+    void db_watch(const int key, const std::function<void(const int)> &callback, int curr_cpu = -1);
     // Public only for testing purposes
     std::vector<std::thread> workers;
 

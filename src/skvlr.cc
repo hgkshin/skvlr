@@ -24,8 +24,8 @@ Skvlr::Skvlr(const std::string &name, int num_workers)
     data = new update_maps[num_cores];
     for (int i = 0; i < num_cores; ++i) {
         pthread_spin_init(&data[i].puts_lock, 0);
-        pthread_spin_init(&data[i].local_state_lock, 0);
-        data[i].local_state = new std::map<int, int>();
+        pthread_rwlock_init(&data[i].local_state_lock, 0);
+        data[i].num_updates = 0;
     }
     for(int i = 0; i < num_workers; i++) {
         worker_init_data init_data(name, i, &data[i], num_cores, &should_stop);
@@ -51,21 +51,16 @@ Skvlr::~Skvlr()
 void Skvlr::db_get(const int key, int *value, int curr_cpu)
 {
     if (curr_cpu == -1) curr_cpu = sched_getcpu();
-    if(curr_cpu < 0) {
+    if (curr_cpu < 0) {
         DEBUG_SKVLR("Current CPU < 0 on db_get\n");
         return;
     }
 
-
-    pthread_spin_lock(&this->data[curr_cpu % num_workers].local_state_lock);
-    std::map<int, int>::iterator it;
-    it = this->data[curr_cpu % num_workers].local_state->find(key);
-    if (it == this->data[curr_cpu % num_workers].local_state->end()) {
-      *value = 0;
-    } else {
-      *value = it->second;
-    }
-    pthread_spin_unlock(&this->data[curr_cpu % num_workers].local_state_lock);
+    auto &core_state = this->data[curr_cpu % num_workers];
+    pthread_rwlock_rdlock(&core_state.local_state_lock);
+    auto itr = core_state.local_state.find(key);
+    *value = (itr == core_state.local_state.end()) ? 0 : itr->second;
+    pthread_rwlock_unlock(&core_state.local_state_lock);
 }
 
 /**
@@ -83,17 +78,45 @@ void Skvlr::db_put(const int key, int value, int curr_cpu)
         return;
     }
 
+    auto &core_state = this->data[curr_cpu % num_workers];
+    pthread_spin_lock(&core_state.puts_lock);
+    core_state.local_puts[key]  = value;
+    pthread_spin_unlock(&core_state.puts_lock);
+}
+
+void Skvlr::db_sync(int curr_cpu)
+{
+    if (curr_cpu == -1) curr_cpu = sched_getcpu();
+    if (curr_cpu < 0) {
+        DEBUG_SKVLR("Current CPU < 0 on db_put\n");
+        return;
+    }
+
+    auto &core_state = this->data[curr_cpu % num_workers];
+    std::unique_lock<std::mutex> lock(core_state.sync_mutex);
+    int num_updates = core_state.num_updates;
+
+    // Wait on the condition variable until the number of updates changes.
+    core_state.sync_cv.wait(lock, [&core_state, &num_updates]{
+        return core_state.num_updates != num_updates;
+    });
+}
+
+void Skvlr::db_watch(const int key, const std::function<void(const int)> &callback, int curr_cpu)
+{
+    if (curr_cpu == -1) curr_cpu = sched_getcpu();
+    if (curr_cpu < 0) {
+        DEBUG_SKVLR("Current CPU < 0 on db_put\n");
+        return;
+    }
+
     pthread_spin_lock(&this->data[curr_cpu % num_workers].puts_lock);
-    this->data[curr_cpu % num_workers].local_puts[key]  = value;
+    this->data[curr_cpu % num_workers].watches[key].push_back(callback);
     pthread_spin_unlock(&this->data[curr_cpu % num_workers].puts_lock);
 }
 
-void Skvlr::db_sync()
-{
-    /* Empty */
-}
-
 void Skvlr::spawn_worker(worker_init_data init_data, struct global_state *global_state) {
+
     /* Set up processor affinity. */
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);

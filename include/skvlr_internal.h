@@ -6,6 +6,8 @@
 #include <queue>
 #include <sstream>
 #include <fstream>
+#include <vector>
+#include <condition_variable>
 
 #pragma once
 
@@ -44,12 +46,20 @@
 #define CACHE_LINE_SIZE 64
 
 struct update_maps {
-    pthread_spinlock_t local_state_lock;
-    std::map<int, int> *local_state;
+    // The local read-only state and the RW lock on it.
+    pthread_rwlock_t local_state_lock;
+    std::map<int, int> local_state;
     pthread_spinlock_t puts_lock;
+
     // Can't this just be a vector? That'll be less overhead;
     // it's not like we need O(1) random access.
     std::map<int, int> local_puts;
+
+    std::mutex sync_mutex;
+    std::condition_variable sync_cv;
+    int num_updates;
+
+    std::map<int, std::vector<std::function<void(const int)>>> watches;
 } __attribute__((aligned(CACHE_LINE_SIZE)));
 
 struct worker_init_data {
@@ -87,12 +97,13 @@ struct global_state {
     std::ofstream outputLog;
     pthread_spinlock_t global_state_lock;
 
-    global_state(const std::string& file_name) 
+    global_state(const std::string& file_name)
     : outputLog(file_name) {
         pthread_spin_init(&global_state_lock, PTHREAD_PROCESS_SHARED);
         // Read the contents of the data file if any and store it in `data`.
         std::ifstream f(file_name);
         int key, value;
+        if (f.fail()) return;
         while (f >> key >> value) {
             global_data[key] = value;
         }
