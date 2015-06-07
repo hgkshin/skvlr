@@ -93,29 +93,25 @@ double KVProfiler::run_profiler() {
         start_offset_sum += *max_element(start_times.begin(), start_times.end()) - min_start_time;
         
         // Calculate throughput with either avg, median, or real
-        // First trial consistently super variable, ignore. 
-        // If you get rid of this, remember to get rid of the divide by denominator below.
-        if (trial > 0) {
-            //throughput_trials_sum += (total_num_ops / avg_duration);
-            throughput_trials_sum += (total_num_ops / median_duration);
-        }
+        //throughput_trials_sum += (total_num_ops / avg_duration);
+        throughput_trials_sum += (total_num_ops / median_duration);
     }
-    DEBUG_PROFILER("Average thread duration across trials: " << std::endl);
+    DEBUG_PROFILER("Statistics for running " << this->total_cores << " cores" << std::endl);
+    DEBUG_PROFILER("\tAverage thread duration across trials: " << std::endl);
     for (size_t i = 0; i < avg_durations.size(); i++) {
-      DEBUG_PROFILER("\tTrial " << i << ": " << avg_durations[i] << std::endl);
+      DEBUG_PROFILER("\t\tTrial " << i << ": " << avg_durations[i] << std::endl);
     }
-    DEBUG_PROFILER("Median thread duration across trials: " << std::endl);
+    DEBUG_PROFILER("\tMedian thread duration across trials: " << std::endl);
     for (size_t i = 0; i < median_durations.size(); i++) {
-      DEBUG_PROFILER("\tTrial " << i << ": " << median_durations[i] << std::endl);
+      DEBUG_PROFILER("\t\tTrial " << i << ": " << median_durations[i] << std::endl);
     }
-    DEBUG_PROFILER("Max - Min thread duration across trials: " << std::endl);
+    DEBUG_PROFILER("\tMax - Min thread duration across trials: " << std::endl);
     for (size_t i = 0; i < max_durations.size(); i++) {
-      DEBUG_PROFILER("\tTrial " << i << ": " << max_durations[i] - min_durations[i] << std::endl);
+      DEBUG_PROFILER("\t\tTrial " << i << ": " << max_durations[i] - min_durations[i] << std::endl);
     }
-    DEBUG_PROFILER("Average start time offset across trials: " <<
+    DEBUG_PROFILER("\tAverage start time offset across trials: " <<
                     start_offset_sum/num_trials << std::endl);
-    // Divide by num_trials - 1 since we don't include the first trial due to high variance.
-    return throughput_trials_sum / (num_trials - 1);
+    return throughput_trials_sum / (num_trials);
 }
 
 void KVProfiler::generate_per_client_ops(

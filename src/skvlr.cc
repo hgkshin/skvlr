@@ -56,11 +56,14 @@ void Skvlr::db_get(const int key, int *value, int curr_cpu)
         return;
     }
 
-    try {
-        pthread_spin_lock(&this->data[curr_cpu % num_workers].local_state_lock);
-        *value = this->data[curr_cpu % num_workers].local_state->at(key);
-    } catch (const std::out_of_range& err) {
-        *value = 0;
+
+    pthread_spin_lock(&this->data[curr_cpu % num_workers].local_state_lock);
+    std::map<int, int>::iterator it;
+    it = this->data[curr_cpu % num_workers].local_state->find(key);
+    if (it == this->data[curr_cpu % num_workers].local_state->end()) {
+      *value = 0;
+    } else {
+      *value = it->second;
     }
     pthread_spin_unlock(&this->data[curr_cpu % num_workers].local_state_lock);
 }
