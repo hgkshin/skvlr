@@ -59,18 +59,6 @@ double KVProfiler::run_profiler() {
                                            per_client_ops[client_id]);
         }
         
-        /*while (true) {
-          this->ready_threads_m.lock();
-          if (this->ready_threads_count == this->total_cores) {
-            this->ready_threads_m.unlock();
-            break;
-          }
-          this->ready_threads_m.unlock();
-          sleep(0.1);
-        }
-        this->ready_threads_cv.notify_all(); */
-        
-        
         for (auto &thread : threads) {
           thread.join();
         }
@@ -108,7 +96,6 @@ double KVProfiler::run_profiler() {
         //throughput_trials_sum += (total_num_ops / avg_duration);
         throughput_trials_sum += (total_num_ops / median_duration);
         
-        //sleep(SLEEP_TIME);
     }
     DEBUG_PROFILER("Average thread duration across trials: " <<
                     avg_duration_sum/num_trials << std::endl); 
@@ -244,15 +231,9 @@ void KVProfiler::run_client(const size_t client_core, const std::vector<std::pai
 
     int curr_cpu = sched_getcpu();
     
-    /* Synchronization to get all threads to start roughly at the same time */
-    /*this->ready_threads_m.lock();
-    this->ready_threads_count++;
-    this->ready_threads_m.unlock();
-    std::unique_lock<std::mutex> lk(this->ready_threads_m);
-    ready_threads_cv.wait(lk, [&] {return this->ready_threads_count == this->total_cores;}); */
-
     while (get_wall_time() < this->time_to_start) {
-      sleep(0.01);
+      int milliseconds_sleep = 10;
+      usleep(milliseconds_sleep * 1000);
     }
 
     /* Start measuring the operations */

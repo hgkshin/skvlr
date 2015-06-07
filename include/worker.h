@@ -21,4 +21,6 @@ private:
     worker_init_data worker_data;
     unsigned int total_gets;
     unsigned int total_puts;
+
+    double get_wall_time();
 };

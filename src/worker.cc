@@ -1,5 +1,7 @@
 #include <iostream>
 #include <assert.h>
+#include <sys/time.h>
+#include <ctime>
 
 #include "worker.h"
 
@@ -18,17 +20,30 @@ Worker::~Worker()
                  << total_puts << std::endl);
 }
 
+double Worker::get_wall_time() {
+    struct timeval time;
+    if (gettimeofday(&time, NULL)){
+        return 0;
+    }
+    return (double)time.tv_sec + (double)time.tv_usec * .000001;
+}
+
 /**
  * Listen for incoming requests by busy waiting and inspecting the queue of
  * requests for new PENDING requests to service.
  */
 void Worker::listen()
 {
-  std::map<int, int> *old_state = NULL;
+    std::map<int, int> *old_state = NULL;
+    // Sleep for a random offset ala Raft
+    unsigned int millisecond_offset = rand() % 100;
+    usleep(millisecond_offset * 1000);
+    
     while(!*this->worker_data.should_exit) {
-        int time = this->worker_data.core_id % 10;
-        sleep(10 + time / 10.0);
+        unsigned int millisecond_sleep = 100;
+        usleep(millisecond_sleep * 1000); // This is in microseconds
 
+        double start_time = get_wall_time();
         // We figure most gets on the old map are done by the time
         // we're swapping out the map.
         if(old_state != NULL) {
@@ -46,14 +61,18 @@ void Worker::listen()
         std::map<int, int> *new_state = new std::map<int, int>(
             global_state->global_data.begin(), global_state->global_data.end());                                                              
 
-        // TODO: THIS IS SO SO SO UNSAFE YIKES.
         old_state = this->worker_data.maps->local_state;
         this->worker_data.maps->local_state = new_state;
 
         // If we're okay with a looser persistence model, we
-        // can move this oepration to after the unlock.
+        // can move this operation to after the unlock.
         persist(core_local_puts);
         global_state->unlock();
+        
+        double end_time = get_wall_time();
+        UNUSED(start_time);
+        UNUSED(end_time);
+        DEBUG_WORKER("Duration of worker: " << end_time - start_time << std::endl);
     }
 }
 

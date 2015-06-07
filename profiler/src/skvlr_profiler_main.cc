@@ -53,20 +53,20 @@ void run_experiment(ExperimentType type,
 int main() {
     size_t TOTAL_CORES = 8; //sysconf(_SC_NPROCESSORS_ONLN);
     size_t NUM_TRIALS = 5;
-    size_t NUM_OPS = 1000000;
+    size_t NUM_OPS = 10000000;
 
     clean_up_dir();
+
+    DEBUG_PROFILER("Running Profiler on Skvlr (Get Heavy)....." << std::endl);
+    run_experiment(SKVLR, PROFILER_DUMP_DIR + "profiler_skvlr_get_db", PARTITION_GET_HEAVY,
+                   TOTAL_CORES, NUM_TRIALS, NUM_OPS);
+    DEBUG_PROFILER(std::endl);
 
     DEBUG_PROFILER("Running Profiler on Empty Skvlr....." << std::endl);
     run_experiment(EMPTYSKVLR, PROFILER_DUMP_DIR + "profiler_empty_get_db", PARTITION_GET_HEAVY,
                    TOTAL_CORES, NUM_TRIALS, NUM_OPS);
     DEBUG_PROFILER(std::endl);
-    
-    DEBUG_PROFILER("Running Profiler on Skvlr (Get Heavy)....." << std::endl);
-    run_experiment(SKVLR, PROFILER_DUMP_DIR + "profiler_skvlr_get_db", PARTITION_GET_HEAVY,
-                   TOTAL_CORES, NUM_TRIALS, NUM_OPS);
 
-    DEBUG_PROFILER(std::endl);
     /*DEBUG_PROFILER("Running Profiler on Skvlr (Put Heavy)....." << std::endl);
     run_experiment(SKVLR, PROFILER_DUMP_DIR + "profiler_skvlr_put_db", PARTITION_PUT_HEAVY,
                    TOTAL_CORES, NUM_TRIALS, NUM_OPS);*/
