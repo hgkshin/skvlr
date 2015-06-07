@@ -52,9 +52,9 @@ void run_experiment(ExperimentType type,
 
 int main() {
     size_t TOTAL_CORES = 8; //sysconf(_SC_NPROCESSORS_ONLN);
-    size_t NUM_TRIALS = 5;
+    size_t NUM_TRIALS = 3;
     // Memory limited, so we run this number of operations by MULTIPLIER in our run_client code.
-    size_t NUM_OPS = 500000;
+    size_t NUM_OPS = 5000000;
 
     clean_up_dir();
 

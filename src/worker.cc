@@ -39,7 +39,7 @@ void Worker::listen()
     usleep(millisecond_offset * 1000);
     
     while(!*this->worker_data.should_exit) {
-        unsigned int millisecond_sleep = 100;
+        unsigned int millisecond_sleep = 500;
         usleep(millisecond_sleep * 1000); // This is in microseconds
 
         double start_time = get_wall_time();
