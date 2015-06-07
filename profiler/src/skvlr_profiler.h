@@ -6,6 +6,7 @@
 #pragma once
 
 const std::string PROFILER_DUMP_DIR = "profiler/profiler_dump/";
+const int MULTIPLIER = 30;
 
 enum KeyDistribution {PARTITION_GET_HEAVY, PARTITION_PUT_HEAVY,
                       BASIC_GET_HEAVY, BASIC_PUT_HEAVY,

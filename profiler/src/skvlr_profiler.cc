@@ -28,11 +28,11 @@ double KVProfiler::run_profiler() {
     double throughput_trials_sum = 0;
    
     // Statistics to help explain 
-    double avg_duration_sum = 0;  
-    double median_duration_sum = 0;
-    double max_duration_sum = 0;
-    double min_duration_sum = 0;
-    double real_duration_sum = 0;
+    std::vector<double> avg_durations;
+    std::vector<double> median_durations;
+    std::vector<double> max_durations;
+    std::vector<double> min_durations;
+    std::vector<double> real_durations;
     double start_offset_sum = 0;
 
     // Run Profiler 
@@ -52,13 +52,14 @@ double KVProfiler::run_profiler() {
         this->ready_threads_count = 0;
        
 
-        this->time_to_start = get_wall_time() + 1.8; 
+        this->time_to_start = get_wall_time() + 1.5; 
         for (size_t client_id = 0; client_id < this->total_cores; client_id++) {
           total_num_ops += per_client_ops[client_id].size();
           threads[client_id] = std::thread(&KVProfiler::run_client, this, client_id,
                                            per_client_ops[client_id]);
         }
-        
+        total_num_ops *= MULTIPLIER;
+
         for (auto &thread : threads) {
           thread.join();
         }
@@ -69,48 +70,52 @@ double KVProfiler::run_profiler() {
           avg_duration += durations[i];
         }
         avg_duration /= this->total_cores; 
-        avg_duration_sum += avg_duration;
+        avg_durations.push_back(avg_duration);
         
         // Calculate median thread duration
         std::sort(durations.begin(), durations.end());
         double median_duration = durations[durations.size()/2];
-        median_duration_sum += median_duration;
+        median_durations.push_back(median_duration);
 
         // Calculate minimum/max thread duration
         double min_duration = *min_element(durations.begin(), durations.end());
         double max_duration = *max_element(durations.begin(), durations.end());
-        min_duration_sum += min_duration;
-        max_duration_sum += max_duration;
+        min_durations.push_back(min_duration);
+        max_durations.push_back(max_duration);
 
         // Calculate real thread duration
         double min_start_time = *min_element(start_times.begin(), start_times.end());
         double max_end_time = *max_element(end_times.begin(), end_times.end());
         double real_duration = max_end_time - min_start_time; 
-        real_duration_sum += real_duration;
+        real_durations.push_back(real_duration);
         
         // Calculate start offset from max and min start
         start_offset_sum += *max_element(start_times.begin(), start_times.end()) - min_start_time;
         
-        // Real Value
         // Calculate throughput with either avg, median, or real
-        throughput_trials_sum += (total_num_ops / avg_duration);
-        //throughput_trials_sum += (total_num_ops / median_duration);
+        // First trial consistently super variable, ignore. 
+        // If you get rid of this, remember to get rid of the divide by denominator below.
+        if (trial > 0) {
+            //throughput_trials_sum += (total_num_ops / avg_duration);
+            throughput_trials_sum += (total_num_ops / median_duration);
+        }
     }
-    DEBUG_PROFILER("Average thread duration across trials: " <<
-                    avg_duration_sum/num_trials << std::endl); 
-    /*DEBUG_PROFILER("Median thread duration across trials: " <<
-                    median_duration_sum/num_trials << std::endl);
-    DEBUG_PROFILER("Real thread duration across trials: " <<
-                    real_duration_sum/num_trials << std::endl);
-    DEBUG_PROFILER("Min thread duration across trials: " <<
-                    min_duration_sum/num_trials << std::endl);
-    DEBUG_PROFILER("Max thread duration across trials: " <<
-                    max_duration_sum/num_trials << std::endl);
-    */
-    DEBUG_PROFILER("Start time offset across trials: " <<
+    DEBUG_PROFILER("Average thread duration across trials: " << std::endl);
+    for (size_t i = 0; i < avg_durations.size(); i++) {
+      DEBUG_PROFILER("\tTrial " << i << ": " << avg_durations[i] << std::endl);
+    }
+    DEBUG_PROFILER("Median thread duration across trials: " << std::endl);
+    for (size_t i = 0; i < median_durations.size(); i++) {
+      DEBUG_PROFILER("\tTrial " << i << ": " << median_durations[i] << std::endl);
+    }
+    DEBUG_PROFILER("Max - Min thread duration across trials: " << std::endl);
+    for (size_t i = 0; i < max_durations.size(); i++) {
+      DEBUG_PROFILER("\tTrial " << i << ": " << max_durations[i] - min_durations[i] << std::endl);
+    }
+    DEBUG_PROFILER("Average start time offset across trials: " <<
                     start_offset_sum/num_trials << std::endl);
-
-    return throughput_trials_sum / num_trials;
+    // Divide by num_trials - 1 since we don't include the first trial due to high variance.
+    return throughput_trials_sum / (num_trials - 1);
 }
 
 void KVProfiler::generate_per_client_ops(
@@ -237,7 +242,7 @@ void KVProfiler::run_client(const size_t client_core, const std::vector<std::pai
 
     /* Start measuring the operations */
     double start_time = get_wall_time();
-    for (int iter = 0; iter < 30; iter++) { 
+    for (int iter = 0; iter < MULTIPLIER; iter++) { 
       for (size_t i = 0; i < ops.size(); i++) {
             if (ops[i].second == -1) {
                 int val;
