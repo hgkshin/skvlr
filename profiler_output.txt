@@ -1,0 +1,366 @@
+[1;32mPROFILER LOG: Running Profiler on Skvlr (Get Heavy).....
+[0m[1;32mPROFILER LOG: Statistics for running 1 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 5.88462
+[0m[1;32mPROFILER LOG: 		Trial 1: 5.88336
+[0m[1;32mPROFILER LOG: 		Trial 2: 5.88287
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 5.88462
+[0m[1;32mPROFILER LOG: 		Trial 1: 5.88336
+[0m[1;32mPROFILER LOG: 		Trial 2: 5.88287
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0
+[0m[1;32mPROFILER LOG: 		Trial 1: 0
+[0m[1;32mPROFILER LOG: 		Trial 2: 0
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0
+[0m[1;32mPROFILER LOG: 2.54945e+07 ops/sec for core 1 (1x)
+[0m[1;32mPROFILER LOG: Statistics for running 2 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 5.89087
+[0m[1;32mPROFILER LOG: 		Trial 1: 5.88686
+[0m[1;32mPROFILER LOG: 		Trial 2: 5.88766
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 5.89328
+[0m[1;32mPROFILER LOG: 		Trial 1: 5.89116
+[0m[1;32mPROFILER LOG: 		Trial 2: 5.89011
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.00480604
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.00859714
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.00490689
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0.000495354
+[0m[1;32mPROFILER LOG: 5.09207e+07 ops/sec for core 2 (1.99732x)
+[0m[1;32mPROFILER LOG: Statistics for running 3 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 5.87105
+[0m[1;32mPROFILER LOG: 		Trial 1: 5.8645
+[0m[1;32mPROFILER LOG: 		Trial 2: 5.86474
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 5.88994
+[0m[1;32mPROFILER LOG: 		Trial 1: 5.88928
+[0m[1;32mPROFILER LOG: 		Trial 2: 5.88997
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.068388
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.0803921
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.0817149
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0.000473976
+[0m[1;32mPROFILER LOG: 7.64042e+07 ops/sec for core 3 (2.99689x)
+[0m[1;32mPROFILER LOG: Statistics for running 4 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 5.88351
+[0m[1;32mPROFILER LOG: 		Trial 1: 5.88445
+[0m[1;32mPROFILER LOG: 		Trial 2: 5.88058
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 5.89322
+[0m[1;32mPROFILER LOG: 		Trial 1: 5.90597
+[0m[1;32mPROFILER LOG: 		Trial 2: 5.89228
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.105019
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.112655
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.11097
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0.000661294
+[0m[1;32mPROFILER LOG: 1.01744e+08 ops/sec for core 4 (3.99082x)
+[0m[1;32mPROFILER LOG: Statistics for running 5 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 5.89211
+[0m[1;32mPROFILER LOG: 		Trial 1: 5.89069
+[0m[1;32mPROFILER LOG: 		Trial 2: 5.8906
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 5.92421
+[0m[1;32mPROFILER LOG: 		Trial 1: 5.92666
+[0m[1;32mPROFILER LOG: 		Trial 2: 5.92559
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.107224
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.114013
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.112977
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0.00104403
+[0m[1;32mPROFILER LOG: 1.26572e+08 ops/sec for core 5 (4.96467x)
+[0m[1;32mPROFILER LOG: Statistics for running 6 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 5.90302
+[0m[1;32mPROFILER LOG: 		Trial 1: 5.8939
+[0m[1;32mPROFILER LOG: 		Trial 2: 5.89221
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 5.9256
+[0m[1;32mPROFILER LOG: 		Trial 1: 5.92577
+[0m[1;32mPROFILER LOG: 		Trial 2: 5.92611
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.135337
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.125709
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.114974
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0.000838359
+[0m[1;32mPROFILER LOG: 1.51878e+08 ops/sec for core 6 (5.95726x)
+[0m[1;32mPROFILER LOG: Statistics for running 7 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 5.88114
+[0m[1;32mPROFILER LOG: 		Trial 1: 5.87427
+[0m[1;32mPROFILER LOG: 		Trial 2: 5.87411
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 5.87084
+[0m[1;32mPROFILER LOG: 		Trial 1: 5.8629
+[0m[1;32mPROFILER LOG: 		Trial 2: 5.863
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.109521
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.109988
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.109222
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0.000830571
+[0m[1;32mPROFILER LOG: 1.79011e+08 ops/sec for core 7 (7.02153x)
+[0m[1;32mPROFILER LOG: Statistics for running 8 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 6.0055
+[0m[1;32mPROFILER LOG: 		Trial 1: 6.0046
+[0m[1;32mPROFILER LOG: 		Trial 2: 6.00592
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 5.93086
+[0m[1;32mPROFILER LOG: 		Trial 1: 5.93037
+[0m[1;32mPROFILER LOG: 		Trial 2: 5.92968
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.679981
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.682675
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.682402
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0.000908295
+[0m[1;32mPROFILER LOG: 2.02351e+08 ops/sec for core 8 (7.93702x)
+[0m[1;32mPROFILER LOG: 
+[0m[1;32mPROFILER LOG: Running Profiler on Empty Skvlr.....
+[0m[1;32mPROFILER LOG: Statistics for running 1 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.462891
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.462808
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.462773
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.462891
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.462808
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.462773
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0
+[0m[1;32mPROFILER LOG: 		Trial 1: 0
+[0m[1;32mPROFILER LOG: 		Trial 2: 0
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0
+[0m[1;32mPROFILER LOG: 3.24097e+08 ops/sec for core 1 (1x)
+[0m[1;32mPROFILER LOG: Statistics for running 2 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.463289
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.463465
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.463296
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.463363
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.463538
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.463338
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.00014782
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.000145912
+[0m[1;32mPROFILER LOG: 		Trial 2: 8.39233e-05
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0.000415961
+[0m[1;32mPROFILER LOG: 6.47371e+08 ops/sec for core 2 (1.99746x)
+[0m[1;32mPROFILER LOG: Statistics for running 3 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.465201
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.465209
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.465188
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.465204
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.465212
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.465187
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.000232935
+[0m[1;32mPROFILER LOG: 		Trial 1: 9.20296e-05
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.000360966
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0.000689348
+[0m[1;32mPROFILER LOG: 9.67324e+08 ops/sec for core 3 (2.98467x)
+[0m[1;32mPROFILER LOG: Statistics for running 4 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.4666
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.466803
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.466726
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.466668
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.466799
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.466686
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.000311852
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.00029397
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.000378847
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0.000667651
+[0m[1;32mPROFILER LOG: 1.28557e+09 ops/sec for core 4 (3.96663x)
+[0m[1;32mPROFILER LOG: Statistics for running 5 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.467338
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.46688
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.466809
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.467413
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.466872
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.466772
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.000499964
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.000356913
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.000252008
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0.000487248
+[0m[1;32mPROFILER LOG: 1.60593e+09 ops/sec for core 5 (4.95509x)
+[0m[1;32mPROFILER LOG: Statistics for running 6 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.467956
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.467976
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.468034
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.467833
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.468006
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.468116
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.00082612
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.000442028
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.000669003
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0.000840028
+[0m[1;32mPROFILER LOG: 1.92314e+09 ops/sec for core 6 (5.93383x)
+[0m[1;32mPROFILER LOG: Statistics for running 7 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.467551
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.467278
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.467483
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.467553
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.467271
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.467501
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.000501156
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.000470877
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.000507832
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0.000668446
+[0m[1;32mPROFILER LOG: 2.24627e+09 ops/sec for core 7 (6.93085x)
+[0m[1;32mPROFILER LOG: Statistics for running 8 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.468392
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.468602
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.468631
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.468367
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.468834
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.468699
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.000525951
+[0m[1;32mPROFILER LOG: 		Trial 1: 0.000951767
+[0m[1;32mPROFILER LOG: 		Trial 2: 0.000560999
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0.000800292
+[0m[1;32mPROFILER LOG: 2.56064e+09 ops/sec for core 8 (7.90083x)
+[0m[1;32mPROFILER LOG: 
+[0m[1;32mPROFILER LOG: Running Profiler on Unskvlr (Hash Map).....
+[0m[1;32mPROFILER LOG: Statistics for running 1 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 3.74313
+[0m[1;32mPROFILER LOG: 		Trial 1: 3.74309
+[0m[1;32mPROFILER LOG: 		Trial 2: 3.74324
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 3.74313
+[0m[1;32mPROFILER LOG: 		Trial 1: 3.74309
+[0m[1;32mPROFILER LOG: 		Trial 2: 3.74324
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0
+[0m[1;32mPROFILER LOG: 		Trial 1: 0
+[0m[1;32mPROFILER LOG: 		Trial 2: 0
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0
+[0m[1;32mPROFILER LOG: 4.00732e+07 ops/sec for core 1 (1x)
+[0m[1;32mPROFILER LOG: Statistics for running 2 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 22.2571
+[0m[1;32mPROFILER LOG: 		Trial 1: 22.3315
+[0m[1;32mPROFILER LOG: 		Trial 2: 22.3652
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 23.0191
+[0m[1;32mPROFILER LOG: 		Trial 1: 23.0767
+[0m[1;32mPROFILER LOG: 		Trial 2: 23.0996
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 1.52386
+[0m[1;32mPROFILER LOG: 		Trial 1: 1.49031
+[0m[1;32mPROFILER LOG: 		Trial 2: 1.46865
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0.000372966
+[0m[1;32mPROFILER LOG: 1.30067e+07 ops/sec for core 2 (0.324574x)
+[0m[1;32mPROFILER LOG: Statistics for running 3 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 56.8567
+[0m[1;32mPROFILER LOG: 		Trial 1: 55.5143
+[0m[1;32mPROFILER LOG: 		Trial 2: 56.6698
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 56.9835
+[0m[1;32mPROFILER LOG: 		Trial 1: 55.7397
+[0m[1;32mPROFILER LOG: 		Trial 2: 56.8805
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 0.968774
+[0m[1;32mPROFILER LOG: 		Trial 1: 1.39901
+[0m[1;32mPROFILER LOG: 		Trial 2: 1.23442
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0.000665983
+[0m[1;32mPROFILER LOG: 7.96053e+06 ops/sec for core 3 (0.19865x)
+[0m[1;32mPROFILER LOG: Statistics for running 4 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 92.6272
+[0m[1;32mPROFILER LOG: 		Trial 1: 93.8981
+[0m[1;32mPROFILER LOG: 		Trial 2: 94.1036
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 93.593
+[0m[1;32mPROFILER LOG: 		Trial 1: 94.8271
+[0m[1;32mPROFILER LOG: 		Trial 2: 95.0936
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 3.22151
+[0m[1;32mPROFILER LOG: 		Trial 1: 2.83664
+[0m[1;32mPROFILER LOG: 		Trial 2: 3.29391
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0.000672658
+[0m[1;32mPROFILER LOG: 6.3492e+06 ops/sec for core 4 (0.15844x)
+[0m[1;32mPROFILER LOG: Statistics for running 5 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 105.403
+[0m[1;32mPROFILER LOG: 		Trial 1: 106.467
+[0m[1;32mPROFILER LOG: 		Trial 2: 105.57
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 111.363
+[0m[1;32mPROFILER LOG: 		Trial 1: 112.357
+[0m[1;32mPROFILER LOG: 		Trial 2: 111.734
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 23.7565
+[0m[1;32mPROFILER LOG: 		Trial 1: 23.4803
+[0m[1;32mPROFILER LOG: 		Trial 2: 23.3662
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0.00068601
+[0m[1;32mPROFILER LOG: 6.70743e+06 ops/sec for core 5 (0.167379x)
+[0m[1;32mPROFILER LOG: Statistics for running 6 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 145.417
+[0m[1;32mPROFILER LOG: 		Trial 1: 147.602
+[0m[1;32mPROFILER LOG: 		Trial 2: 146.341
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 149.903
+[0m[1;32mPROFILER LOG: 		Trial 1: 152.015
+[0m[1;32mPROFILER LOG: 		Trial 2: 151.275
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 17.1111
+[0m[1;32mPROFILER LOG: 		Trial 1: 16.529
+[0m[1;32mPROFILER LOG: 		Trial 2: 16.7301
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0.000839949
+[0m[1;32mPROFILER LOG: 5.95792e+06 ops/sec for core 6 (0.148676x)
+[0m[1;32mPROFILER LOG: Statistics for running 7 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 151.264
+[0m[1;32mPROFILER LOG: 		Trial 1: 152.729
+[0m[1;32mPROFILER LOG: 		Trial 2: 161.347
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 156.134
+[0m[1;32mPROFILER LOG: 		Trial 1: 157.658
+[0m[1;32mPROFILER LOG: 		Trial 2: 165.908
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 19.3801
+[0m[1;32mPROFILER LOG: 		Trial 1: 21.5474
+[0m[1;32mPROFILER LOG: 		Trial 2: 21.8409
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0.000932296
+[0m[1;32mPROFILER LOG: 6.57127e+06 ops/sec for core 7 (0.163982x)
+[0m[1;32mPROFILER LOG: Statistics for running 8 cores
+[0m[1;32mPROFILER LOG: 	Average thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 187.094
+[0m[1;32mPROFILER LOG: 		Trial 1: 188.873
+[0m[1;32mPROFILER LOG: 		Trial 2: 191.743
+[0m[1;32mPROFILER LOG: 	Median thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 190.598
+[0m[1;32mPROFILER LOG: 		Trial 1: 192.981
+[0m[1;32mPROFILER LOG: 		Trial 2: 194.598
+[0m[1;32mPROFILER LOG: 	Max - Min thread duration across trials: 
+[0m[1;32mPROFILER LOG: 		Trial 0: 10.0136
+[0m[1;32mPROFILER LOG: 		Trial 1: 13.6001
+[0m[1;32mPROFILER LOG: 		Trial 2: 10.9748
+[0m[1;32mPROFILER LOG: 	Average start time offset across trials: 0.000861724
+[0m[1;32mPROFILER LOG: 6.22692e+06 ops/sec for core 8 (0.155389x)
+[0m
