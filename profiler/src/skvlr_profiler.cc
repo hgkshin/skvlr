@@ -93,15 +93,14 @@ double KVProfiler::run_profiler() {
         
         // Real Value
         // Calculate throughput with either avg, median, or real
-        //throughput_trials_sum += (total_num_ops / avg_duration);
-        throughput_trials_sum += (total_num_ops / median_duration);
-        
+        throughput_trials_sum += (total_num_ops / avg_duration);
+        //throughput_trials_sum += (total_num_ops / median_duration);
     }
     DEBUG_PROFILER("Average thread duration across trials: " <<
                     avg_duration_sum/num_trials << std::endl); 
-    DEBUG_PROFILER("Median thread duration across trials: " <<
+    /*DEBUG_PROFILER("Median thread duration across trials: " <<
                     median_duration_sum/num_trials << std::endl);
-    /*DEBUG_PROFILER("Real thread duration across trials: " <<
+    DEBUG_PROFILER("Real thread duration across trials: " <<
                     real_duration_sum/num_trials << std::endl);
     DEBUG_PROFILER("Min thread duration across trials: " <<
                     min_duration_sum/num_trials << std::endl);
@@ -232,18 +231,20 @@ void KVProfiler::run_client(const size_t client_core, const std::vector<std::pai
     int curr_cpu = sched_getcpu();
     
     while (get_wall_time() < this->time_to_start) {
-      int milliseconds_sleep = 10;
+      int milliseconds_sleep = 1;
       usleep(milliseconds_sleep * 1000);
     }
 
     /* Start measuring the operations */
     double start_time = get_wall_time();
-    for (size_t i = 0; i < ops.size(); i++) {
-        if (ops[i].second == -1) {
-            int val;
-            this->kv_store->db_get(ops[i].first, &val, curr_cpu);
-        } else {
-            this->kv_store->db_put(ops[i].first, ops[i].second, curr_cpu);
+    for (int iter = 0; iter < 30; iter++) { 
+      for (size_t i = 0; i < ops.size(); i++) {
+            if (ops[i].second == -1) {
+                int val;
+                this->kv_store->db_get(ops[i].first, &val, curr_cpu);
+            } else {
+                this->kv_store->db_put(ops[i].first, ops[i].second, curr_cpu);
+            }
         }
     }
     double end_time = get_wall_time();
