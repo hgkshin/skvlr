@@ -24,6 +24,7 @@ Skvlr::Skvlr(const std::string &name, int num_workers)
     data = new update_maps[num_cores];
     for (int i = 0; i < num_cores; ++i) {
         pthread_spin_init(&data[i].puts_lock, 0);
+        pthread_spin_init(&data[i].local_state_lock, 0);
         data[i].local_state = new std::map<int, int>();
     }
     for(int i = 0; i < num_workers; i++) {
@@ -56,10 +57,12 @@ void Skvlr::db_get(const int key, int *value, int curr_cpu)
     }
 
     try {
+        pthread_spin_lock(&this->data[curr_cpu % num_workers].local_state_lock);
         *value = this->data[curr_cpu % num_workers].local_state->at(key);
     } catch (const std::out_of_range& err) {
         *value = 0;
     }
+    pthread_spin_unlock(&this->data[curr_cpu % num_workers].local_state_lock);
 }
 
 /**

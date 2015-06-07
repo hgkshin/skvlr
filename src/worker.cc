@@ -47,8 +47,10 @@ void Worker::listen()
             global_state->global_data.begin(), global_state->global_data.end());                                                              
 
         // TODO: THIS IS SO SO SO UNSAFE YIKES.
+        pthread_spin_lock(&this->worker_data.maps->local_state_lock);
         old_state = this->worker_data.maps->local_state;
         this->worker_data.maps->local_state = new_state;
+        pthread_spin_unlock(&this->worker_data.maps->local_state_lock);
 
         // If we're okay with a looser persistence model, we
         // can move this oepration to after the unlock.
