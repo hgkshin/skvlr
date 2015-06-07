@@ -33,12 +33,16 @@ PROFILER_SRCS = skvlr_profiler_main.cc skvlr_profiler.cc
 PROFILER_OBJS = $(PROFILER_SRCS:%.cc=$(OBJ_DIR)/%.o)
 PROFILER_BIN = $(BIN_DIR)/profiler
 
+WATCH_SRCS = watch_demo.cc
+WATCH_OBJS = $(WATCH_SRCS:%.cc=$(OBJ_DIR)/%.o)
+WATCH_BIN = $(BIN_DIR)/watch_demo
+
 LIBRARY_SKVLR = $(LIBS_DIR)/skvlr.a
 LIBRARY_UNSKVLR = $(LIBS_DIR)/unskvlr.a
 LIBRARY_EMPTYSKVLR = $(LIBS_DIR)/empty_skvlr.a
 LIBRARY_HOARD = Hoard/src/libhoard.so
 
-EXECUTABLES = $(TEST_BIN) $(PROFILER_BIN)
+EXECUTABLES = $(TEST_BIN) $(PROFILER_BIN) $(WATCH_BIN)
 
 vpath % $(SRC_DIR) $(TEST_DIR) $(PROFILER_DIR)
 
@@ -86,6 +90,11 @@ $(PROFILER_BIN): $(PROFILER_OBJS) $(LIBRARY_SKVLR) $(LIBRARY_UNSKVLR) $(LIBRARY_
 
 profiler: $(PROFILER_BIN)
 	@-$(PROFILER_BIN)
+
+$(WATCH_BIN): $(WATCH_OBJS) $(LIBRARY_SKVLR) | $(BIN_DIR)
+	@echo + $@ [ld $^]
+	@$(CC) -o $@ $^ $(LDFLAGS)
+
 
 .PHONY: all clean
 

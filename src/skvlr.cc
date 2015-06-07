@@ -87,6 +87,20 @@ void Skvlr::db_sync()
     /* Empty */
 }
 
+
+void Skvlr::db_watch(const int key, const std::function<void(const int)> &callback, int curr_cpu)
+{
+    if (curr_cpu == -1) curr_cpu = sched_getcpu();
+    if (curr_cpu < 0) {
+        DEBUG_SKVLR("Current CPU < 0 on db_put\n");
+        return;
+    }
+
+    pthread_spin_lock(&this->data[curr_cpu % num_workers].puts_lock);
+    this->data[curr_cpu % num_workers].watches[key].push_back(callback);
+    pthread_spin_unlock(&this->data[curr_cpu % num_workers].puts_lock);
+}
+
 void Skvlr::spawn_worker(worker_init_data init_data, std::map<int, int> *global_state) {
     /* Set up processor affinity. */
     cpu_set_t cpuset;

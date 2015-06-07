@@ -5,6 +5,7 @@
 #include <thread>
 #include <queue>
 #include <sstream>
+#include <vector>
 
 #pragma once
 
@@ -46,6 +47,7 @@ struct update_maps {
     std::map<int, int> local_state;
     pthread_spinlock_t puts_lock;
     std::map<int, int> local_puts;
+    std::map<int, std::vector<std::function<void(const int)>>> watches;
 } __attribute__((aligned(CACHE_LINE_SIZE)));
 
 struct worker_init_data {

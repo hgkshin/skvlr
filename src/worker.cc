@@ -39,11 +39,25 @@ void Worker::listen()
         sleep(10 + time / 10.0);
 
         std::map<int, int> core_local_puts;
+        std::map<int, std::vector<std::function<void(const int)>>> watches;
         pthread_spin_lock(&this->worker_data.maps->puts_lock);
         core_local_puts.swap(this->worker_data.maps->local_puts);
+        watches = this->worker_data.maps->watches;
         pthread_spin_unlock(&this->worker_data.maps->puts_lock);
 
-        global_state->insert(core_local_puts.begin(), core_local_puts.end());
+        for (auto kv : core_local_puts) {
+            (*global_state)[kv.first] = kv.second;
+        }
+
+        auto local_state = this->worker_data.maps->local_state;
+        for (auto kv : *global_state) {
+            if (local_state.find(kv.first) == local_state.end() ||
+                local_state[kv.first] != kv.second) {
+                for (auto &fn : watches[kv.first]) {
+                    fn(kv.second);
+                }
+            }
+        }
 
         this->worker_data.maps->local_state.insert(global_state->begin(), global_state->end());
 
