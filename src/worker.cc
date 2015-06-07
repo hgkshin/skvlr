@@ -34,7 +34,6 @@ double Worker::get_wall_time() {
  */
 void Worker::listen()
 {
-    std::map<int, int> *old_state = NULL;
     // Sleep for a random offset ala Raft
     unsigned int millisecond_offset = rand() % 100;
     usleep(millisecond_offset * 1000);
@@ -44,11 +43,6 @@ void Worker::listen()
         usleep(millisecond_sleep * 1000); // This is in microseconds
 
         double start_time = get_wall_time();
-        // We figure most gets on the old map are done by the time
-        // we're swapping out the map.
-        if(old_state != NULL) {
-            delete old_state;
-        }
 
         std::map<int, int> core_local_puts;
         pthread_spin_lock(&this->worker_data.maps->puts_lock);
@@ -62,8 +56,9 @@ void Worker::listen()
             global_state->global_data.begin(), global_state->global_data.end());                                                              
 
         pthread_spin_lock(&this->worker_data.maps->local_state_lock);
-        old_state = this->worker_data.maps->local_state;
+        std::map<int, int> *old_state = this->worker_data.maps->local_state;
         this->worker_data.maps->local_state = new_state;
+        delete old_state;
         pthread_spin_unlock(&this->worker_data.maps->local_state_lock);
 
         // If we're okay with a looser persistence model, we
