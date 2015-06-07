@@ -44,6 +44,7 @@
 #define CACHE_LINE_SIZE 64
 
 struct update_maps {
+    pthread_spinlock_t local_state_lock;
     std::map<int, int> *local_state;
     pthread_spinlock_t puts_lock;
     // Can't this just be a vector? That'll be less overhead;
