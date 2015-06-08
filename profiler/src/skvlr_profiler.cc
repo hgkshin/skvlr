@@ -51,7 +51,6 @@ double KVProfiler::run_profiler() {
         UNUSED(this->ready_threads_count);
         this->ready_threads_count = 0;
        
-
         this->time_to_start = get_wall_time() + 1.5; 
         for (size_t client_id = 0; client_id < this->total_cores; client_id++) {
           total_num_ops += per_client_ops[client_id].size();
@@ -95,6 +94,7 @@ double KVProfiler::run_profiler() {
         // Calculate throughput with either avg, median, or real
         //throughput_trials_sum += (total_num_ops / avg_duration);
         throughput_trials_sum += (total_num_ops / median_duration);
+        DEBUG_PROFILER("TOTAL NUM OPS: " << total_num_ops << std::endl);
     }
     DEBUG_PROFILER("Statistics for running " << this->total_cores << " cores" << std::endl);
     DEBUG_PROFILER("\tAverage thread duration across trials: " << std::endl);
@@ -120,17 +120,12 @@ void KVProfiler::generate_per_client_ops(
         if (this->kd == PARTITION_GET_HEAVY) {
             per_client_ops[client_id] = generate_partitioned_ops(this->ops_per_trial, 0.95, 20,
                                                                  client_id);
-        } else if (this->kd == PARTITION_PUT_HEAVY) {
-            per_client_ops[client_id] = generate_partitioned_ops(this->ops_per_trial, 0.10, 20,
-                                                                 client_id);
-        } else if (this->kd == BASIC_GET_HEAVY) {
-            per_client_ops[client_id] = generate_basic_ops(this->ops_per_trial, 0.95);
-        } else if (this->kd == BASIC_PUT_HEAVY) {
-            per_client_ops[client_id] = generate_basic_ops(this->ops_per_trial, 0.10);
         } else if (this->kd == HOT_KEYS_GET_HEAVY) {
             per_client_ops[client_id] = generate_hot_key_ops(this->ops_per_trial, 0.95);
-        } else if (this->kd == HOT_KEYS_PUT_HEAVY) {
-            per_client_ops[client_id] = generate_hot_key_ops(this->ops_per_trial, 0.10);
+        } else if (this->kd == SINGLE_KEY_GET_HEAVY) {
+            per_client_ops[client_id] = generate_single_key_ops(this->ops_per_trial, 0.95);
+        } else if (this->kd == SYNC_GET_HEAVY) {
+            per_client_ops[client_id] = generate_sync_key_ops(this->ops_per_trial, 0.95);
         }
     } 
 }
@@ -175,27 +170,6 @@ std::vector<std::pair<int, int>> KVProfiler::generate_partitioned_ops(size_t num
     return client_ops;
 }
 
-std::vector<std::pair<int, int>> KVProfiler::generate_basic_ops(size_t num_ops, double get_prop) {
-  std::vector<std::pair<int, int>> client_ops;
-  
-  size_t num_gets = num_ops * get_prop;
-  size_t num_puts = num_ops * (1 - get_prop);
-
-  for(size_t get = 0; get < num_gets; get++) {
-    std::pair<int, int> op(1, -1);
-    client_ops.push_back(op);
-  }
-  
-  for (size_t put = 0; put < num_puts; put++) {
-    int rand_value = rand();
-    assert(rand_value >= 0);
-    std::pair<int, int> op(1, rand_value);
-    client_ops.push_back(op);
-  }
-  std::random_shuffle(client_ops.begin(), client_ops.end());
-  return client_ops;
-}
-
 std::vector<std::pair<int, int>> KVProfiler::generate_hot_key_ops(size_t num_ops,
                                                                   double get_prop) {
   std::vector<std::pair<int, int>> client_ops;
@@ -205,7 +179,7 @@ std::vector<std::pair<int, int>> KVProfiler::generate_hot_key_ops(size_t num_ops
   
   std::default_random_engine generator;
   // Adjustable mean/std dev
-  std::normal_distribution<double> distribution(0, 7);
+  std::normal_distribution<double> distribution(0, 5);
   
   for(size_t get = 0; get < num_gets; get++) {
     std::pair<int, int> op((int) distribution(generator), -1);
@@ -219,6 +193,53 @@ std::vector<std::pair<int, int>> KVProfiler::generate_hot_key_ops(size_t num_ops
     client_ops.push_back(op);
   }
   std::random_shuffle(client_ops.begin(), client_ops.end());
+  return client_ops;
+}
+
+std::vector<std::pair<int, int>> KVProfiler::generate_single_key_ops(size_t num_ops,
+                                                                     double get_prop) {
+  std::vector<std::pair<int, int>> client_ops;
+   
+  size_t num_gets = num_ops * get_prop;
+  size_t num_puts = num_ops * (1 - get_prop);
+  
+  for(size_t get = 0; get < num_gets; get++) {
+    std::pair<int, int> op(0, -1);
+    client_ops.push_back(op);
+  }
+  
+  for (size_t put = 0; put < num_puts; put++) {
+    int rand_value = rand();
+    assert(rand_value >= 0);
+    std::pair<int, int> op(0, rand_value);
+    client_ops.push_back(op);
+  }
+  std::random_shuffle(client_ops.begin(), client_ops.end());
+  return client_ops;
+}
+
+std::vector<std::pair<int, int>> KVProfiler::generate_sync_key_ops(size_t num_ops,
+                                                                   double get_prop) {
+  std::vector<std::pair<int, int>> client_ops;
+   
+  size_t num_gets = num_ops * get_prop;
+  size_t num_puts = num_ops * (1 - get_prop);
+    
+  for (size_t put = 0; put < num_puts; put++) {
+    int rand_value = rand();
+    assert(rand_value >= 0);
+    std::pair<int, int> op(0, rand_value);
+    client_ops.push_back(op);
+  }
+
+  // Sync indicator
+  std::pair<int, int> op(0, -2);
+  client_ops.push_back(op);
+  
+  for(size_t get = 0; get < num_gets; get++) {
+    std::pair<int, int> op(0, -1);
+    client_ops.push_back(op);
+  }
   return client_ops;
 }
 
@@ -243,7 +264,10 @@ void KVProfiler::run_client(const size_t client_core, const std::vector<std::pai
             if (ops[i].second == -1) {
                 int val;
                 this->kv_store->db_get(ops[i].first, &val, curr_cpu);
-            } else {
+            } else if (ops[i].second == -2) {
+                this->kv_store->db_sync(curr_cpu);
+            }
+            else {
                 this->kv_store->db_put(ops[i].first, ops[i].second, curr_cpu);
             }
         }
