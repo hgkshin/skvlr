@@ -63,32 +63,15 @@ struct update_maps {
 } __attribute__((aligned(CACHE_LINE_SIZE)));
 
 struct worker_init_data {
-    const std::string dir_name;
     const int core_id;
     update_maps *maps;
-    const int num_queues;
     const bool *should_exit;
 
-    worker_init_data(const std::string dir_name, const int core_id,
-                     update_maps *maps, const int num_queues, const bool *should_exit)
-    :  dir_name(dir_name), core_id(core_id), maps(maps), num_queues(num_queues),
-        should_exit(should_exit)
+    worker_init_data(const int core_id, update_maps *maps,
+            const bool *should_exit)
+    :  core_id(core_id), maps(maps), should_exit(should_exit)
     {
         /* Empty */
-    }
-
-    // Returns the name of the data file that this worker stores its data in.
-    std::string dataFileName() const {
-        std::stringstream ss;
-        ss << this->core_id << ".data";
-        return ss.str();
-    }
-
-    // Returns the path at which this worker stores its data.
-    std::string dataFilePath() const {
-        std::stringstream ss;
-        ss << this->dir_name << "/" << dataFileName();
-        return ss.str();
     }
 };
 
@@ -98,7 +81,7 @@ struct global_state {
     pthread_spinlock_t global_state_lock;
 
     global_state(const std::string& file_name)
-    : outputLog(file_name) {
+    : outputLog(file_name, std::ios::app) {
         pthread_spin_init(&global_state_lock, PTHREAD_PROCESS_SHARED);
         // Read the contents of the data file if any and store it in `data`.
         std::ifstream f(file_name);

@@ -41,3 +41,7 @@ profiler/profiler_dump/*
 *~
 
 bin
+
+profiler_db/
+test_db/
+worker/
