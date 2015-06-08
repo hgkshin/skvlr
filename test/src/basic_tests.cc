@@ -15,11 +15,11 @@ const std::string TEST_PINNING = TEST_DUMP_DIR + "test_pinning_db";
 
 static bool test_db_open() {
   Skvlr test_kv(TEST_OPEN, 1);
-  DIR *dir = opendir(TEST_OPEN.c_str());
-  if (!dir) {
+  std::ifstream data(TEST_OPEN);
+  if (!data) {
     return false;
   }
-  closedir(dir); 
+  data.close();
   return true;
 }
 
@@ -48,7 +48,7 @@ static bool test_pinning() {
         index++;
     }
     return true;
-} 
+}
 
 BEGIN_TEST_SUITE(basic_tests) {
     run_test(test_db_open);
