@@ -6,11 +6,10 @@
 #pragma once
 
 const std::string PROFILER_DUMP_DIR = "profiler/profiler_dump/";
-const int MULTIPLIER = 30;
+const int MULTIPLIER = 1;
 
-enum KeyDistribution {PARTITION_GET_HEAVY, PARTITION_PUT_HEAVY,
-                      BASIC_GET_HEAVY, BASIC_PUT_HEAVY,
-                      HOT_KEYS_GET_HEAVY, HOT_KEYS_PUT_HEAVY};
+enum KeyDistribution {PARTITION_GET_HEAVY, HOT_KEYS_GET_HEAVY, SINGLE_KEY_GET_HEAVY,
+                      SYNC_GET_HEAVY};
 
 class KVProfiler {
  public:
@@ -43,8 +42,10 @@ class KVProfiler {
                                                               size_t num_distinct_keys,
                                                               size_t client_core);
 
-    std::vector<std::pair<int, int>> generate_basic_ops(size_t num_ops, double get_prop);
     std::vector<std::pair<int, int>> generate_hot_key_ops(size_t num_ops, double get_prop);
+    std::vector<std::pair<int, int>> generate_single_key_ops(size_t num_ops, double get_prop);
+    std::vector<std::pair<int, int>> generate_sync_key_ops(size_t num_ops, double get_prop);
+
     void run_client(const size_t client_core, const std::vector<std::pair<int, int>> ops); 
     double get_wall_time();
 };
