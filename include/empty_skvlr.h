@@ -1,5 +1,8 @@
 #include "skvlr_internal.h"
 #include "kvstore.h"
+#include <assert.h>
+#include <map>
+#include <mutex>
 
 #pragma once
 
@@ -16,4 +19,9 @@ public:
     void db_put(const int key, int value,  int curr_cpu = -1);
 
  private:
+    struct aligned_map {
+        std::map<int, int>map;
+        std::mutex map_lock;
+    }__attribute__((aligned(64)));
+    aligned_map maps[8];
 };

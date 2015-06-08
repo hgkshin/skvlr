@@ -94,7 +94,6 @@ double KVProfiler::run_profiler() {
         // Calculate throughput with either avg, median, or real
         //throughput_trials_sum += (total_num_ops / avg_duration);
         throughput_trials_sum += (total_num_ops / median_duration);
-        DEBUG_PROFILER("TOTAL NUM OPS: " << total_num_ops << std::endl);
     }
     DEBUG_PROFILER("Statistics for running " << this->total_cores << " cores" << std::endl);
     DEBUG_PROFILER("\tAverage thread duration across trials: " << std::endl);

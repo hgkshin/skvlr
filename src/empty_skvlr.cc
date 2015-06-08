@@ -12,16 +12,23 @@ EmptySkvlr::~EmptySkvlr()
 
 void EmptySkvlr::db_get(const int key, int *value, int curr_cpu)
 {
-    UNUSED(key);
-    UNUSED(value);
-    UNUSED(curr_cpu);
-    return;
+    assert(curr_cpu >= 0);
+    auto& map = maps[curr_cpu];
+    map.map_lock.lock();
+    auto it = map.map.find(key);
+    if (it == map.map.end()) {
+      *value = 0;
+    } else {
+      *value = it->second;
+    }
+    map.map_lock.unlock();
 }
 
 void EmptySkvlr::db_put(const int key, int value, int curr_cpu)
 {
-    UNUSED(key);
-    UNUSED(value);
-    UNUSED(curr_cpu);
-    return;
+    assert(curr_cpu >= 0);
+    auto& map = maps[curr_cpu];
+    map.map_lock.lock();
+    map.map[key] = value;
+    map.map_lock.unlock();
 }

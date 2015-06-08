@@ -51,31 +51,14 @@ void run_experiment(ExperimentType type,
 }
 
 int main() {
-    size_t TOTAL_CORES = sysconf(_SC_NPROCESSORS_ONLN);
-    size_t NUM_TRIALS = 3;
+    size_t TOTAL_CORES = 8; //sysconf(_SC_NPROCESSORS_ONLN);
+    size_t NUM_TRIALS = 2;
     // Memory limited, so we run this number of operations by MULTIPLIER in our run_client code.
     // Currently MULTIPLIER is 1 since we didn't need to enhance ops on AWS, but if memory
     // is an issue you can lower NUM_OPS and increase multiplier
-    size_t NUM_OPS = 30000000;
+    size_t NUM_OPS = 50000000;
 
     clean_up_dir();
-
-    DEBUG_PROFILER("Running Profiler for 95% Gets, Normally Distributed with hot keys from " <<
-                   "N(0, 5)" << std::endl); 
-    DEBUG_PROFILER("Running Profiler on Skvlr....." << std::endl);
-    run_experiment(SKVLR, PROFILER_DUMP_DIR + "profiler_skvlr_get_db", HOT_KEYS_GET_HEAVY,
-                   TOTAL_CORES, NUM_TRIALS, NUM_OPS);
-    DEBUG_PROFILER(std::endl);
-
-    /*DEBUG_PROFILER("Running Profiler on Empty Skvlr....." << std::endl);
-    run_experiment(EMPTYSKVLR, PROFILER_DUMP_DIR + "profiler_empty_get_db",HOT_KEYS_GET_HEAVY,
-                   TOTAL_CORES, NUM_TRIALS, NUM_OPS);
-    DEBUG_PROFILER(std::endl);
-
-    DEBUG_PROFILER("Running Profiler on Unskvlr (Hash Map)....." << std::endl);
-    run_experiment(UNSKVLR, PROFILER_DUMP_DIR + "profiler_unskvlr_db", HOT_KEYS_GET_HEAVY,
-                   TOTAL_CORES, NUM_TRIALS, NUM_OPS); 
-    DEBUG_PROFILER(std::endl); */
 
     DEBUG_PROFILER("Running Profiler for 95% Gets, 1 Key" << std::endl);
     DEBUG_PROFILER("Running Profiler on Skvlr....." << std::endl);
@@ -83,13 +66,21 @@ int main() {
                    TOTAL_CORES, NUM_TRIALS, NUM_OPS);
     DEBUG_PROFILER(std::endl);
 
-    DEBUG_PROFILER("Running Profiler for 95% Gets, Puts batched together with a sync call with "
-                   << "N(0, 5)" << std::endl);
+    DEBUG_PROFILER("Running Profiler for 95% Gets, Normally Distributed with hot keys from " <<
+                   "N(0, 5)" << std::endl); 
     DEBUG_PROFILER("Running Profiler on Skvlr....." << std::endl);
-    run_experiment(SKVLR, PROFILER_DUMP_DIR + "profiler_skvlr_get_db", SYNC_GET_HEAVY,
+    run_experiment(SKVLR, PROFILER_DUMP_DIR + "profiler_skvlr_get_db", HOT_KEYS_GET_HEAVY,
+                   TOTAL_CORES, NUM_TRIALS, NUM_OPS);
+    DEBUG_PROFILER(std::endl);
+    
+    DEBUG_PROFILER("Running Profiler on Empty Skvlr....." << std::endl);
+    run_experiment(EMPTYSKVLR, PROFILER_DUMP_DIR + "profiler_empty_get_db",HOT_KEYS_GET_HEAVY,
                    TOTAL_CORES, NUM_TRIALS, NUM_OPS);
     DEBUG_PROFILER(std::endl);
 
-
+    DEBUG_PROFILER("Running Profiler on Unskvlr (Hash Map)....." << std::endl);
+    run_experiment(UNSKVLR, PROFILER_DUMP_DIR + "profiler_unskvlr_db", HOT_KEYS_GET_HEAVY,
+                   TOTAL_CORES, NUM_TRIALS, NUM_OPS); 
+    DEBUG_PROFILER(std::endl); 
     return 0;
 }
