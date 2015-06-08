@@ -34,7 +34,7 @@ static bool test_skvlr_destructor() {
 
 static bool test_pinning() {
     Skvlr test_kv(TEST_PINNING, total_cores());
-    sleep(5); // Allow workers to spawn
+    sleep(1); // Allow workers to spawn
     int index = 0;
     for (auto& worker : test_kv.workers) {
         cpu_set_t cpuset;
