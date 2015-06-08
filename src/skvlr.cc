@@ -28,7 +28,7 @@ Skvlr::Skvlr(const std::string &name, int num_workers)
         data[i].num_updates = 0;
     }
     for(int i = 0; i < num_workers; i++) {
-        worker_init_data init_data(name, i, &data[i], num_cores, &should_stop);
+        worker_init_data init_data(i, &data[i], &should_stop);
         workers[i] = std::thread(&spawn_worker, init_data, &global_state);
     }
 }
