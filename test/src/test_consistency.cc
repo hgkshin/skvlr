@@ -14,7 +14,7 @@
 #include "worker.h"
 #include "skvlr_test.h"
 
-const int NUM_CORES = 8;
+const int NUM_CORES = 4;
 const int SECS_IN_TEXT = 6;
 const int TIMEOUT_LENGTH = 1;
 
@@ -105,7 +105,7 @@ static void put_data(int start_key, int end_key, Skvlr *kv,
         mtx->lock();
         int val = generate_val(key);
         kv->db_put(key, val);
-        data->insert(key, val);
+        (*data)[key] = val;
         mtx->unlock();
     }
 }
