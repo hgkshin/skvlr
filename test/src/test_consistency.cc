@@ -162,13 +162,25 @@ static bool test_multiple_clients_sync() {
 //static bool test_multiple_clients() {
     //// keys: keys inserted; values: (value, timestamp)
     //std::map<int, std::deque<std::pair<int, double>> values;
-
-
 //}
 
-//static bool test_watch() {
+int global_watch_callback_value = 0;
 
-//}
+void callback_fn(const int test) {
+    UNUSED(test);
+    global_watch_callback_value++;
+}
+
+static bool test_watch() {
+    const int kKeyToWatch = 42;
+    Skvlr kv(TEST_WATCH, 1);
+    kv.db_put(kKeyToWatch, -1);
+    kv.db_watch(kKeyToWatch, callback_fn, 1);
+    kv.db_put(kKeyToWatch, 2);
+    kv.db_sync();
+    check_eq(global_watch_callback_value, 1);
+    return true;
+}
 
 BEGIN_TEST_SUITE(test_consistency) {
     run_test(test_single_client_sync);
@@ -176,5 +188,5 @@ BEGIN_TEST_SUITE(test_consistency) {
     run_test(test_multiple_clients_sync);
     //run_test(test_single_client);
     //run_test(test_multiple_clients);
-    //run_test(test_watch);
+    run_test(test_watch);
 }
