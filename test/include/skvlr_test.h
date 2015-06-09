@@ -179,4 +179,5 @@ int begin_testing(int, const char *argv[]);
  */
 void basic_tests(bool *result, int *_num_tests, int *_num_passed);
 void single_thread_tests(bool *result, int *_num_tests, int *_num_passed);
+void test_consistency(bool *result, int *_num_tests, int *_num_passed);
 #endif
