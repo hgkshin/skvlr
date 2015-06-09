@@ -112,7 +112,7 @@ static void put_data(int start_key, int end_key, Skvlr *kv,
 
 static bool test_multiple_clients_sync() {
     Skvlr kv(TEST_MULTIPLE_SYNC, NUM_CORES);
-    std::vector<std::thread> workers;
+    std::vector<std::thread> workers(NUM_CORES);
     std::map<int, int> data;
     std::mutex mtx;
 
