@@ -25,7 +25,7 @@ UNSKVLR_OBJS = $(UNSKVLR_SOURCES:%.cc=$(OBJ_DIR)/%.o)
 EMPTYSKVLR_SOURCES = empty_skvlr.cc
 EMPTYSKVLR_OBJS = $(EMPTYSKVLR_SOURCES:%.cc=$(OBJ_DIR)/%.o)
 
-TEST_SRCS = skvlr_test.cc basic_tests.cc single_thread_tests.cc test_utils.cc
+TEST_SRCS = skvlr_test.cc basic_tests.cc single_thread_tests.cc test_consistency.cc test_utils.cc
 TEST_OBJS = $(TEST_SRCS:%.cc=$(OBJ_DIR)/%.o)
 TEST_BIN = $(BIN_DIR)/test
 
