@@ -104,7 +104,7 @@ static void put_data(int start_key, int end_key, Skvlr *kv,
     for (int key = start_key; key < end_key; ++key) {
         mtx->lock();
         int val = generate_val(key);
-        kv->db_put(key, val);
+        kv->db_put(key, val, core_num);
         (*data)[key] = val;
         mtx->unlock();
     }
@@ -116,19 +116,36 @@ static bool test_multiple_clients_sync() {
     std::map<int, int> data;
     std::mutex mtx;
 
-    int num_keys_per_worker = 1000;
+    int num_total_inserts_per_worker = 10000;
+    int num_rounds = 10;
+    int num_inserts_per_round = num_total_inserts_per_worker / num_rounds;
 
-    // spawn worker threads
-    for (int core_num = 0; core_num < NUM_CORES; ++core_num) {
-        int start = core_num * num_keys_per_worker;
-        int end = start + num_keys_per_worker;
+    for (int round = 0; round < num_rounds; ++round) {
+        // spawn worker threads
+        for (int core_num = 0; core_num < NUM_CORES; ++core_num) {
+            int start = core_num * num_total_inserts_per_worker +
+                round * num_inserts_per_round;
+            int end = start + num_inserts_per_round;
 
-        workers[core_num] = std::thread(&put_data, start, end, &kv, &data, &mtx,
-                core_num);
-    }
+            workers[core_num] = std::thread(&put_data, start, end, &kv, &data, &mtx,
+                    core_num);
+        }
 
-    for (int core_num = 0; core_num < NUM_CORES; ++core_num) {
-        workers[core_num].join();
+        for (int core_num = 0; core_num < NUM_CORES; ++core_num) {
+            workers[core_num].join();
+        }
+        kv.db_sync();
+
+        check_eq((int) data.size(),
+                NUM_CORES * ((round + 1) * num_inserts_per_round));
+        for (auto iter = data.begin(); iter != data.end(); ++iter) {
+            int key = iter->first;
+            int val = iter->second;
+            int retrieved_val;
+            kv.db_get(key, &retrieved_val);
+            std::cout << key << " | " << val << ", retrieved " << retrieved_val << std::endl;
+            check_eq(retrieved_val, val);
+        }
     }
 
     return true;
