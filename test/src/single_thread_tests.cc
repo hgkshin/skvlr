@@ -145,7 +145,17 @@ static bool test_global_state_loads_from_file() {
     return true;
 }
 
+static bool test_not_exist() {
+    std::string file_name = "test/test_dump/test_not_exist";
+    Skvlr kv(file_name, 1);
+    int value;
+    kv.db_get(1, &value);
+    check_eq(value, 0);
+    return true;
+}
+
 BEGIN_TEST_SUITE(single_thread_tests) {
+    run_test(test_not_exist);
     run_test(test_valid_values);
     run_test(test_worker_persistence_single);
     run_test(test_worker_persistence_map);

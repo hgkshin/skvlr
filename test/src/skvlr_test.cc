@@ -32,5 +32,6 @@ BEGIN_TESTING {
     run_suite(basic_tests);
     prepare_for_next_suite(TEST_DUMP_DIR);
     run_suite(single_thread_tests);
-    //run_suite(many_thread_tests);
+    prepare_for_next_suite(TEST_DUMP_DIR);
+    run_suite(test_consistency);
 }

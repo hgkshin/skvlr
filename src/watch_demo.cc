@@ -23,7 +23,7 @@ int main() {
 
     printf("Main thread: Storing initial value.\n");
     kv.db_put(kKeyToWatch, -1);
-    kv.db_sync();
+    kv.db_sync(0);
 
     std::vector<std::thread> threads(kNumCores);
     for (int i = 0; i < kNumCores; ++i) {
@@ -56,7 +56,7 @@ int main() {
 
     printf("Main thread: Setting %d => %d\n", kKeyToWatch, 137);
     kv.db_put(kKeyToWatch, 137);
-    kv.db_sync();
+    kv.db_sync(0);
 
     for (std::thread &thread : threads) {
         thread.join();

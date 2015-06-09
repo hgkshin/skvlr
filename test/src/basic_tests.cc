@@ -4,7 +4,6 @@
 #include <map>
 #include <sys/dir.h>
 
-
 #include "skvlr.h"
 #include "worker.h"
 #include "skvlr_test.h"
@@ -55,7 +54,3 @@ BEGIN_TEST_SUITE(basic_tests) {
     run_test(test_skvlr_destructor);
     run_test(test_pinning);
 }
-
-
-
-
