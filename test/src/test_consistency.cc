@@ -108,6 +108,7 @@ static void put_data(int start_key, int end_key, Skvlr *kv,
         (*data)[key] = val;
         mtx->unlock();
     }
+    kv->db_sync(core_num);
 }
 
 static bool test_multiple_clients_sync() {
@@ -137,7 +138,7 @@ static bool test_multiple_clients_sync() {
         }
 
         // sync to ensure flush to skvlr
-        kv.db_sync();
+        kv.db_sync(0);
 
         // check expected number of elems inserted locally
         check_eq((int) data.size(),
@@ -148,7 +149,7 @@ static bool test_multiple_clients_sync() {
             int key = iter->first;
             int val = iter->second;
             int retrieved_val;
-            kv.db_get(key, &retrieved_val);
+            kv.db_get(key, &retrieved_val, 0);
             check_eq(retrieved_val, val);
         }
     }
