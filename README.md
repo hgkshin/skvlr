@@ -1,7 +1,7 @@
 # skvlr
 Scalable multi-core KV store
 
-To compile
+To compile, run it on a high core Ubuntu machine (such as corn or AWS)
 
 ```bash
 # Fetch Hoard dependencies
