@@ -121,7 +121,7 @@ static bool test_multiple_clients_sync() {
     int num_inserts_per_round = num_total_inserts_per_worker / num_rounds;
 
     for (int round = 0; round < num_rounds; ++round) {
-        // spawn worker threads
+        // spawn put worker threads
         for (int core_num = 0; core_num < NUM_CORES; ++core_num) {
             int start = core_num * num_total_inserts_per_worker +
                 round * num_inserts_per_round;
@@ -131,19 +131,24 @@ static bool test_multiple_clients_sync() {
                     core_num);
         }
 
+        // wait for completion
         for (int core_num = 0; core_num < NUM_CORES; ++core_num) {
             workers[core_num].join();
         }
+
+        // sync to ensure flush to skvlr
         kv.db_sync();
 
+        // check expected number of elems inserted locally
         check_eq((int) data.size(),
                 NUM_CORES * ((round + 1) * num_inserts_per_round));
+
+        // verify all values stored locally are in skvlr
         for (auto iter = data.begin(); iter != data.end(); ++iter) {
             int key = iter->first;
             int val = iter->second;
             int retrieved_val;
             kv.db_get(key, &retrieved_val);
-            std::cout << key << " | " << val << ", retrieved " << retrieved_val << std::endl;
             check_eq(retrieved_val, val);
         }
     }
@@ -151,18 +156,76 @@ static bool test_multiple_clients_sync() {
     return true;
 }
 
-//static bool test_single_client() {
-    //Skvlr kv(TEST_SINGLE, NUM_CORES);
+static bool test_single_client() {
+    Skvlr kv(TEST_SINGLE, 1);
 
-    //// keys: keys inserted; values: (value, timestamp)
-    //std::map<int, std::deque<std::pair<int, double>> values;
+    int start = -1000;
+    int end = 1000;
 
-//}
+    for (int key = start; key < end; ++key) {
+        int val;
+        kv.db_get(key, &val);
+        check_eq(val, 0);
+        val = generate_val(key);
+        kv.db_put(key, val);
+    }
 
-//static bool test_multiple_clients() {
-    //// keys: keys inserted; values: (value, timestamp)
-    //std::map<int, std::deque<std::pair<int, double>> values;
-//}
+    sleep(2);
+
+    for (int key = start; key < end; ++key) {
+        int val;
+        kv.db_get(key, &val);
+        check_eq(val, generate_val(key));
+    }
+
+    return true;
+}
+
+static bool test_multiple_clients() {
+    Skvlr kv(TEST_MULTIPLE, NUM_CORES);
+    std::vector<std::thread> workers(NUM_CORES);
+    std::map<int, int> data;
+    std::mutex mtx;
+
+    int num_total_inserts_per_worker = 10000;
+    int num_rounds = 4;
+    int num_inserts_per_round = num_total_inserts_per_worker / num_rounds;
+
+    for (int round = 0; round < num_rounds; ++round) {
+        // spawn put worker threads
+        for (int core_num = 0; core_num < NUM_CORES; ++core_num) {
+            int start = core_num * num_total_inserts_per_worker +
+                round * num_inserts_per_round;
+            int end = start + num_inserts_per_round;
+
+            workers[core_num] = std::thread(&put_data, start, end, &kv, &data, &mtx,
+                    core_num);
+        }
+
+        // wait for completion
+        for (int core_num = 0; core_num < NUM_CORES; ++core_num) {
+            workers[core_num].join();
+        }
+
+        // sleep long enough to ensure flush to skvlr
+        sleep(2);
+
+        // check expected number of elems inserted locally
+        check_eq((int) data.size(),
+                NUM_CORES * ((round + 1) * num_inserts_per_round));
+
+        // verify all values stored locally are in skvlr
+        for (auto iter = data.begin(); iter != data.end(); ++iter) {
+            int key = iter->first;
+            int val = iter->second;
+            int retrieved_val;
+            kv.db_get(key, &retrieved_val);
+            check_eq(retrieved_val, val);
+        }
+    }
+
+    return true;
+}
 
 int global_watch_callback_value = 0;
 
@@ -186,7 +249,7 @@ BEGIN_TEST_SUITE(test_consistency) {
     run_test(test_single_client_sync);
     run_test(test_single_client_sequential_sync);
     run_test(test_multiple_clients_sync);
-    //run_test(test_single_client);
-    //run_test(test_multiple_clients);
+    run_test(test_single_client);
+    run_test(test_multiple_clients);
     run_test(test_watch);
 }
